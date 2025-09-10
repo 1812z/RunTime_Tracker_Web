@@ -157,7 +157,7 @@ onUnmounted(() => {
       <footer class="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-sm border-t border-gray-200 py-4 shadow-sm">
         <div class="container mx-auto text-center">
           <p class="text-gray-500 text-sm">
-            © 2023 Runtime Tracker ·
+            © 2025 Runtime Tracker ·
             <a href="https://github.com/1812z/RunTime_Tracker"
                target="_blank"
                class="text-blue-600 hover:text-blue-800 hover:underline transition-colors duration-200">

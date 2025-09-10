@@ -77,7 +77,12 @@ onUnmounted(() => {
 <template>
   <div class="bg-gray-100 min-h-screen rounded-lg">
     <div class="max-w-7xl mx-auto px-4">
-      <h1 class="text-3xl font-bold text-center mb-8 text-blue-600 pt-6">设备使用统计</h1>
+      <h1 class="text-4xl font-bold text-center mb-8 flex items-center justify-center gap-3 pt-8">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+        设备使用时间统计
+      </h1>
 
       <div class="flex flex-col lg:flex-row gap-6 pb-6">
         <!-- 左侧模块区 -->
@@ -86,11 +91,21 @@ onUnmounted(() => {
           <div class="bg-white rounded-lg shadow-md p-6">
             <div class="grid grid-cols-2 gap-4">
               <div class="border border-gray-200 rounded-lg p-4 text-center shadow-md">
-                <h3 class="text-gray-500 text-sm font-medium">总设备数</h3>
+                <h3 class="text-gray-500 text-sm font-medium flex items-center justify-center gap-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                  总设备数
+                </h3>
                 <p class="text-2xl font-bold mt-2">{{ devices.length }}</p>
               </div>
               <div class="border border-gray-200 rounded-lg p-4 text-center shadow-md">
-                <h3 class="text-gray-500 text-sm font-medium">在线设备数</h3>
+                <h3 class="text-gray-500 text-sm font-medium flex items-center justify-center gap-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
+                  </svg>
+                  在线设备数
+                </h3>
                 <p class="text-2xl font-bold mt-2 text-green-600">
                   {{ devices.filter(d => d.running).length }}
                 </p>
@@ -102,7 +117,12 @@ onUnmounted(() => {
           <div class="sticky top-4 z-20">
             <div class="bg-white rounded-lg shadow-md p-6 ">
               <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-semibold">设备列表</h2>
+                <h2 class="text-xl font-semibold flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  设备列表
+                </h2>
                 <button @click="fetchDevices" class="px-3 py-1 text-sm bg-gray-100 rounded-md hover:bg-gray-200 transition-colors">
                   <span class="flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -140,7 +160,12 @@ onUnmounted(() => {
             <div class="bg-white rounded-lg shadow-md p-6 mt-5">
               <div class="flex justify-between items-baseline">
                 <!-- 标题和日期选择器 -->
-                <h2 class="text-xl font-semibold">统计日期</h2>
+                <h2 class="text-xl font-semibold flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  统计日期
+                </h2>
                 <div>
                   <input
                       type="date"
@@ -158,7 +183,10 @@ onUnmounted(() => {
         <div class="flex-1 min-w-0"> <!-- 使用 flex-1 和 min-w-0 防止溢出 -->
           <div class="bg-white rounded-lg shadow-md p-6 sticky top-40">
             <div class="flex justify-between items-center mb-4">
-              <h2 class="text-xl font-semibold">
+              <h2 class="text-xl font-semibold flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
                 <span v-if="selectedDevice">{{ selectedDevice }} 使用统计</span>
                 <span v-else>请选择设备查看统计</span>
               </h2>

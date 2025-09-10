@@ -15,6 +15,7 @@ import {
   BarController
 } from 'chart.js';
 import config from '../config.js'
+import RecentApps from "./RecentApps.vue";
 const API_BASE = config.API_BASE
 
 // 注册 Chart.js 组件
@@ -40,6 +41,10 @@ const props = defineProps({
   deviceInfo: {
     type: Object,
     default: null
+  },
+  date: {
+    type: String,
+    default: null
   }
 });
 
@@ -53,7 +58,15 @@ const chartInstances = {
 // 获取设备统计信息
 const fetchStats = async () => {
   try {
-    const response = await fetch(`${API_BASE}/stats/${props.deviceId}`);
+    let url = `${API_BASE}/stats/${props.deviceId}`;
+    if (props.date) {
+      const today = new Date().toISOString().split('T')[0];
+      url = props.date === today
+          ? `${API_BASE}/stats/${props.deviceId}`
+          : `${API_BASE}/stats/${props.deviceId}/${props.date}`;
+    }
+
+    const response = await fetch(url);
     if (!response.ok) throw new Error('获取统计失败');
     stats.value = await response.json();
     updateCharts();
@@ -261,6 +274,7 @@ onUnmounted(() => {
 });
 
 watch(() => props.deviceId, fetchStats);
+watch(() => props.date, fetchStats);
 watch(() => props.deviceInfo, () => {});
 </script>
 
@@ -293,7 +307,7 @@ watch(() => props.deviceInfo, () => {});
 
   <!-- 当前使用情况 -->
   <div v-if="deviceInfo?.currentApp" class="mb-6">
-    <div class="bg-blue-50 p-4 rounded-lg">
+    <div class="bg-blue-50 p-4 rounded-lg shadow-md">
       <div class="flex items-center justify-between">
         <div>
           <p class="text-sm text-blue-800">{{ deviceInfo.running ? '当前应用' : '上次应用' }}</p>
@@ -313,13 +327,13 @@ watch(() => props.deviceInfo, () => {});
 
   <!-- 图表区 -->
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-    <div class="bg-white p-4 rounded-lg border border-gray-200" style="height: 300px;">
+    <div class="bg-white p-4 rounded-lg border-2 border-gray-200 shadow-md" style="height: 300px;">
       <h3 class="text-lg font-medium mb-4">应用使用时间</h3>
       <div class="flex items-center justify-center" style="height: calc(100% - 2rem);">
         <canvas id="appUsageChart"></canvas>
       </div>
     </div>
-    <div class="bg-white p-4 rounded-lg border border-gray-200" style="height: 300px;">
+    <div class="bg-white p-4 rounded-lg border-2 border-gray-200 shadow-md" style="height: 300px;">
       <h3 class="text-lg font-medium mb-4">24小时使用统计</h3>
       <div class="flex items-center justify-center" style="height: calc(100% - 2rem);">
         <canvas id="hourlyUsageChart"></canvas>
@@ -328,7 +342,7 @@ watch(() => props.deviceInfo, () => {});
   </div>
 
   <!-- 详细使用数据 -->
-  <div v-if="stats" class="bg-white rounded-lg shadow-md p-6 mb-6">
+  <div v-if="stats" class="bg-white rounded-lg border-2 border-gray-200 shadow-md p-6 mb-6 ">
     <h3 class="text-lg font-medium mb-4">详细使用数据</h3>
     <div class="overflow-x-auto">
       <table class="min-w-full divide-y divide-gray-200">
@@ -348,7 +362,7 @@ watch(() => props.deviceInfo, () => {});
               <div class="w-full bg-gray-200 rounded-full h-3 md:h-2.5 flex-1 min-w-[50px]">
                 <div
                     class="bg-blue-600 h-full rounded-full transition-all duration-500 min-w-[0.25rem]"
-                    :style="{ width: `${Math.max(0.5, ((usage.duration + 1) / getDeviceStats().totalUsageMinutes)*100)}%` }"
+                    :style="{ width: `${((usage.duration / getDeviceStats().totalUsageMinutes) * 100)}%` }"
                 ></div>
               </div>
               <span class="text-xs text-gray-500 w-12 text-right">
@@ -361,7 +375,7 @@ watch(() => props.deviceInfo, () => {});
       </table>
     </div>
   </div>
-</template>
 
-<style scoped>
-</style>
+  <RecentApps :deviceId="deviceId" />
+
+</template>

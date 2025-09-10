@@ -14,6 +14,8 @@ import {
   DoughnutController,
   BarController
 } from 'chart.js';
+import config from '../config.js'
+const API_BASE = config.API_BASE
 
 // 注册 Chart.js 组件
 Chart.register(
@@ -41,7 +43,6 @@ const props = defineProps({
   }
 });
 
-const API_BASE = 'http://127.0.0.1:3000/api';
 const stats = ref(null);
 const error = ref(null);
 const chartInstances = {
@@ -344,15 +345,15 @@ watch(() => props.deviceInfo, () => {});
           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ usage.formattedDuration }}</td>
           <td class="px-6 py-4 whitespace-nowrap">
             <div class="flex items-center gap-3">
-              <div class="w-full bg-gray-200 rounded-full h-2.5 flex-1">
+              <div class="w-full bg-gray-200 rounded-full h-3 md:h-2.5 flex-1 min-w-[50px]">
                 <div
-                    class="bg-blue-600 h-2.5 rounded-full transition-all duration-500"
-                    :style="{ width: `${((usage.duration + 1) / getDeviceStats().totalUsageMinutes)*100 }%` }"
+                    class="bg-blue-600 h-full rounded-full transition-all duration-500 min-w-[0.25rem]"
+                    :style="{ width: `${Math.max(0.5, ((usage.duration + 1) / getDeviceStats().totalUsageMinutes)*100)}%` }"
                 ></div>
               </div>
               <span class="text-xs text-gray-500 w-12 text-right">
-                  {{ Math.round((usage.duration / getDeviceStats().totalUsageMinutes) * 100) }}%
-                </span>
+                {{ Math.round((usage.duration / getDeviceStats().totalUsageMinutes) * 100) }}%
+              </span>
             </div>
           </td>
         </tr>

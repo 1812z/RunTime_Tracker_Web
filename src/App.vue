@@ -1,8 +1,9 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import DeviceStats from './components/DeviceStats.vue';
+import config from './config.js'
 
-const API_BASE = 'http://127.0.0.1:3000/api';
+const API_BASE = config.API_BASE
 const devices = ref([]);
 const selectedDevice = ref(null);
 const error = ref(null);
@@ -80,9 +81,20 @@ onUnmounted(() => {
       <div class="flex flex-col lg:flex-row gap-6 pb-6">
         <!-- 左侧模块区 -->
         <div class="space-y-6">
-          <!-- 左侧表单 -->
+          <!-- 设备统计卡片 -->
           <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-xl font-semibold">Demo</h2>
+            <div class="grid grid-cols-2 gap-4">
+              <div class="border rounded-lg p-4 text-center shadow-md">
+                <h3 class="text-gray-500 text-sm font-medium">总设备数</h3>
+                <p class="text-2xl font-bold mt-2">{{ devices.length }}</p>
+              </div>
+              <div class="border rounded-lg p-4 text-center shadow-md">
+                <h3 class="text-gray-500 text-sm font-medium">在线设备数</h3>
+                <p class="text-2xl font-bold mt-2 text-green-600">
+                  {{ devices.filter(d => d.running).length }}
+                </p>
+              </div>
+            </div>
           </div>
 
           <!-- 设备列表 -->

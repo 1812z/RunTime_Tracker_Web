@@ -154,25 +154,21 @@ onUnmounted(() => {
           </div>
         </div>
       </div>
-
-      <footer class="text-center py-6 text-gray-500 text-sm">
-        <a href="https://github.com/1812z/RunTime_Tracker" target="_blank" class="text-blue-600 hover:underline">Github</a>
+      <footer class="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-sm border-t border-gray-200 py-4 shadow-sm">
+        <div class="container mx-auto text-center">
+          <p class="text-gray-500 text-sm">
+            © 2023 Runtime Tracker ·
+            <a href="https://github.com/1812z/RunTime_Tracker"
+               target="_blank"
+               class="text-blue-600 hover:text-blue-800 hover:underline transition-colors duration-200">
+              GitHub
+            </a>
+          </p>
+        </div>
       </footer>
     </div>
   </div>
 </template>
 
 <style scoped>
-.device-item {
-  padding: 8px;
-  border-bottom: 1px solid #eee;
-  cursor: pointer;
-}
-.device-item:hover {
-  background-color: #f5f5f5;
-}
-.app-name {
-  color: #666;
-  margin-left: 10px;
-}
 </style>

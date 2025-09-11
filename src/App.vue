@@ -7,6 +7,9 @@ const API_BASE = config.API_BASE
 const devices = ref([]);
 const selectedDevice = ref(null);
 const selectedDate = ref(new Date().toISOString().split('T')[0]); // 默认选择今天
+const today = new Date();
+const localDateString = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+selectedDate.value = localDateString;
 const error = ref(null);
 
 const refreshInterval = ref(null);
@@ -148,6 +151,27 @@ onUnmounted(() => {
                       <p class="text-gray-600 text-sm mt-1">
                         <span class="font-medium">当前应用:</span> {{ device.currentApp || '无' }}
                       </p>
+                      <!-- 电量显示 -->
+                      <div v-if="device.batteryLevel > 0" class="flex items-center mt-1">
+                        <span class="text-gray-600 text-sm font-medium mr-1">电量:</span>
+                        <div class="relative">
+                          <!-- 电池外壳 -->
+                          <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              class="h-4 w-6"
+                              viewBox="0 0 24 12"
+                              fill="none"
+                              stroke="#6b7280"
+                              stroke-width="1.5"
+                          >
+                            <!-- 电池主体 -->
+                            <rect x="0.5" y="0.5" width="18" height="11" rx="1.5" />
+                            <!-- 电池正极 -->
+                            <rect x="19" y="3" width="2" height="6" rx="0.5" />
+                          </svg>
+                        </div>
+                        <span class="text-gray-600 text-xs ml-1">{{ device.batteryLevel }}%</span>
+                      </div>
                     </div>
                     <span class="inline-block px-2 py-1 text-xs rounded-full"
                           :class="device.running ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">

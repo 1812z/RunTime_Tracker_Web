@@ -55,11 +55,11 @@ watch(() => props.deviceId, fetchRecentApps);
 </script>
 
 <template>
-  <div class="mt-8 bg-white rounded-lg border-2 border-gray-200 shadow-md p-6 relative">
+  <div class="mt-8 rounded-lg border-2 border-gray-200 shadow-md p-6 relative dark:border-gray-700">
     <!-- 标题和刷新按钮 -->
     <div class="flex justify-between items-center mb-4">
       <h3 class="text-lg font-medium">最近使用的应用</h3>
-      <button @click="fetchRecentApps" class="px-3 py-1 text-sm bg-gray-100 rounded-md hover:bg-gray-200 transition-colors">
+      <button @click="fetchRecentApps" class="px-3 py-1 text-sm bg-gray-100 rounded-md hover:bg-gray-200 transition-colors dark:bg-[#181a1b] dark:text-gray-200 dark:hover:bg-gray-700">
         <span class="flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -88,8 +88,8 @@ watch(() => props.deviceId, fetchRecentApps);
         暂无最近使用应用记录
       </div>
 
-      <table v-if="recentApps.length > 0" class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
+      <table v-if="recentApps.length > 0" class="min-w-full not-dark:divide-y divide-gray-200">
+        <thead>
         <tr>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">应用</th>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">开始时间</th>
@@ -97,12 +97,12 @@ watch(() => props.deviceId, fetchRecentApps);
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">持续时间</th>
         </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-        <tr v-for="app in recentApps" :key="app._id" class="hover:bg-gray-50">
-          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 truncate max-w-xs">{{ app.appName }}</td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ formatTime(app.startTime) }}</td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ app.endTime ? formatTime(app.endTime) : '运行中' }}</td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ formatDuration(app.duration) }}</td>
+        <tbody class="not-dark:divide-y divide-gray-50">
+        <tr v-for="app in recentApps" :key="app._id">
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium  truncate max-w-xs">{{ app.appName }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm ">{{ formatTime(app.startTime) }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm ">{{ app.endTime ? formatTime(app.endTime) : '运行中' }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm ">{{ formatDuration(app.duration) }}</td>
         </tr>
         </tbody>
       </table>

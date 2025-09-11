@@ -287,27 +287,27 @@ watch(() => props.deviceInfo, () => {});
 
   <!-- 设备统计概览 -->
   <div v-if="stats" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-    <div class="bg-blue-50 info-block">
-      <p class="text-sm text-blue-800">应用总数</p>
+    <div class="bg-blue-50 info-block dark:bg-blue-950">
+      <p class="text-sm text-blue-700">应用总数</p>
       <p class="text-2xl font-bold">{{ getDeviceStats().appCount }}</p>
     </div>
-    <div class="bg-green-50 info-block">
-      <p class="text-sm text-green-800">总时间</p>
+    <div class="bg-green-50 info-block dark:bg-green-950">
+      <p class="text-sm text-green-700">总时间</p>
       <p class="text-2xl font-bold">{{ getDeviceStats().totalUsageHours }}小时</p>
     </div>
-    <div class="bg-yellow-50 info-block">
-      <p class="text-sm text-yellow-800">最常用</p>
+    <div class="bg-yellow-50 info-block dark:bg-yellow-950">
+      <p class="text-sm text-yellow-700">最常用</p>
       <p class="text-2xl font-bold truncate" :title="getDeviceStats().topApp">{{ getDeviceStats().topApp }}</p>
     </div>
-    <div class="bg-purple-50 info-block">
-      <p class="text-sm text-purple-800">最活跃时段</p>
+    <div class="bg-purple-50 info-block dark:bg-purple-950">
+      <p class="text-sm text-purple-700">最活跃时段</p>
       <p class="text-2xl font-bold">{{ getDeviceStats().busiestHour }}时</p>
     </div>
   </div>
 
   <!-- 当前使用情况 -->
   <div v-if="deviceInfo?.currentApp" class="mb-6">
-    <div class="bg-blue-50 p-4 rounded-lg shadow-md">
+    <div class="bg-blue-50 p-4 rounded-lg shadow-md dark:bg-[#1d1f20]">
       <div class="flex items-center justify-between">
         <div>
           <p class="text-sm text-blue-800">{{ deviceInfo.running ? '当前应用' : '上次应用' }}</p>
@@ -327,13 +327,13 @@ watch(() => props.deviceInfo, () => {});
 
   <!-- 图表区 -->
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-    <div class="bg-white p-4 rounded-lg border-2 border-gray-200 shadow-md" style="height: 300px;">
+    <div class="p-4 rounded-lg border-2 border-gray-200 shadow-md 181a1b dark:bg-[#181a1b] dark:border-gray-700" style="height: 300px;">
       <h3 class="text-lg font-medium mb-4">应用使用时间</h3>
       <div class="flex items-center justify-center" style="height: calc(100% - 2rem);">
         <canvas id="appUsageChart"></canvas>
       </div>
     </div>
-    <div class="bg-white p-4 rounded-lg border-2 border-gray-200 shadow-md" style="height: 300px;">
+    <div class="p-4 rounded-lg border-2 border-gray-200 shadow-md dark:bg-[#181a1b] dark:border-gray-700" style="height: 300px;">
       <h3 class="text-lg font-medium mb-4">24小时使用统计</h3>
       <div class="flex items-center justify-center" style="height: calc(100% - 2rem);">
         <canvas id="hourlyUsageChart"></canvas>
@@ -342,24 +342,24 @@ watch(() => props.deviceInfo, () => {});
   </div>
 
   <!-- 详细使用数据 -->
-  <div v-if="stats" class="bg-white rounded-lg border-2 border-gray-200 shadow-md p-6 mb-6 ">
+  <div v-if="stats" class="rounded-lg border-2 border-gray-200 shadow-md p-6 mb-6 dark:bg-[#181a1b] dark:border-gray-700">
     <h3 class="text-lg font-medium mb-4">详细使用数据</h3>
     <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
+      <table class="min-w-full not-dark:divide-y divide-gray-200">
+        <thead>
         <tr>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">应用</th>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">使用时间</th>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">占比</th>
         </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
+        <tbody class="not-dark:divide-y divide-gray-200">
         <tr v-for="usage in renderUsageDetails()" :key="usage.app">
-          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ usage.app }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium ">{{ usage.app }}</td>
           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ usage.formattedDuration }}</td>
           <td class="px-6 py-4 whitespace-nowrap">
             <div class="flex items-center gap-3">
-              <div class="w-full bg-gray-200 rounded-full h-3 md:h-2.5 flex-1 min-w-[50px]">
+              <div class="w-full bg-gray-200 rounded-full h-3 md:h-2.5 flex-1 min-w-[50px] dark:bg-[#25282a]">
                 <div
                     class="bg-blue-600 h-full rounded-full transition-all duration-500 min-w-[0.25rem]"
                     :style="{ width: `${((usage.duration / getDeviceStats().totalUsageMinutes) * 100)}%` }"

@@ -56,14 +56,21 @@ const chartInstances = {
 };
 
 // 获取设备统计信息
+// 在fetchStats函数中添加获取时区偏移量的逻辑
 const fetchStats = async () => {
   try {
-    let url = `${API_BASE}/stats/${props.deviceId}`;
+    // 获取当前时区偏移量（分钟）
+    const timezoneOffset = new Date().getTimezoneOffset();
+    // 转换为小时格式（如+8, -5等）
+    const offsetHours = -timezoneOffset / 60;
+    const timezoneParam = `timezoneOffset=${offsetHours > 0 ? '+' : ''}${offsetHours}`;
+
+    let url = `${API_BASE}/stats/${props.deviceId}?${timezoneParam}`;
     if (props.date) {
       const today = new Date().toISOString().split('T')[0];
       url = props.date === today
-          ? `${API_BASE}/stats/${props.deviceId}`
-          : `${API_BASE}/stats/${props.deviceId}/${props.date}`;
+          ? `${API_BASE}/stats/${props.deviceId}?${timezoneParam}`
+          : `${API_BASE}/stats/${props.deviceId}?date=${props.date}&${timezoneParam}`;
     }
 
     const response = await fetch(url);
@@ -350,24 +357,25 @@ watch(() => props.deviceInfo, () => {});
         <tr>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">应用</th>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">使用时间</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">占比</th>
         </tr>
         </thead>
         <tbody class="not-dark:divide-y divide-gray-200">
         <tr v-for="usage in renderUsageDetails()" :key="usage.app">
-          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium ">{{ usage.app }}</td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ usage.formattedDuration }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">{{ usage.app }}</td>
           <td class="px-6 py-4 whitespace-nowrap">
-            <div class="flex items-center gap-3">
-              <div class="w-full bg-gray-200 rounded-full h-3 md:h-2.5 flex-1 min-w-[50px] dark:bg-[#25282a]">
+            <div class="flex flex-col gap-2">
+              <!-- 进度条 -->
+              <div class="w-full bg-gray-200 rounded-full h-3 md:h-2.5 dark:bg-[#25282a]">
                 <div
                     class="bg-blue-600 h-full rounded-full transition-all duration-500 min-w-[0.25rem]"
                     :style="{ width: `${((usage.duration / getDeviceStats().totalUsageMinutes) * 100)}%` }"
                 ></div>
               </div>
-              <span class="text-xs text-gray-500 w-12 text-right">
-                {{ Math.round((usage.duration / getDeviceStats().totalUsageMinutes) * 100) }}%
-              </span>
+              <!-- 使用时间和占比 -->
+              <div class="flex items-center justify-between text-xs text-gray-500">
+                <span>{{ usage.formattedDuration }}</span>
+                <span>{{ Math.round((usage.duration / getDeviceStats().totalUsageMinutes) * 100) }}%</span>
+              </div>
             </div>
           </td>
         </tr>

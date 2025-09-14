@@ -3,19 +3,37 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import DeviceStats from './components/DeviceStats.vue';
 import config from './config.js'
 import GiscusComments from './components/GiscusComments.vue';
-
-const showComments = ref(false); // 默认关闭评论区
+const showComments = ref(false);
 const API_BASE = config.API_BASE
 const devices = ref([]);
 const selectedDevice = ref(null);
-const selectedDate = ref(new Date().toISOString().split('T')[0]); // 默认选择今天
-const today = new Date();
-const localDateString = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
-selectedDate.value = localDateString;
 const error = ref(null);
 const clientIp = ref('获取中...');
 const refreshInterval = ref(null);
 
+// 获取本地日期字符串
+const getLocalDateString = (date = new Date()) => {
+  const offset = date.getTimezoneOffset() * 60000; // 获取时区偏移(毫秒)
+  const localDate = new Date(date - offset);
+  return localDate.toISOString().split('T')[0];
+};
+
+// 使用本地日期初始化
+const selectedDate = ref(getLocalDateString());
+
+// 添加日期转换函数
+const localDateToUTC = (localDate) => {
+  const date = new Date(localDate);
+  // 添加时区偏移量以确保获取UTC日期
+  date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+  return date.toISOString().split('T')[0];
+};
+// 获取最大日期(本地时间)
+const getMaxDate = () => {
+  return getLocalDateString();
+};
+
+// 获取客户端IP
 const fetchClientIp = async () => {
   try {
     const response = await fetch(`${API_BASE}/ip`);
@@ -45,7 +63,6 @@ const fetchDevices = async () => {
 const selectDevice = (deviceId) => {
   selectedDevice.value = deviceId;
 };
-
 // 刷新统计
 const refreshStats = () => {
   if (selectedDevice.value) {
@@ -57,38 +74,32 @@ const refreshStats = () => {
     }, 0);
   }
 };
-
 // 设置自动刷新
 const setupAutoRefresh = () => {
   if (refreshInterval.value) {
     clearInterval(refreshInterval.value);
   }
-
   refreshInterval.value = setInterval(() => {
     if (selectedDevice.value) {
       fetchDevices();
     }
   }, 30000); // 每30秒刷新一次
 };
-
 // 获取选中设备的信息
 const getSelectedDevice = () => {
   if (!selectedDevice.value) return null;
   return devices.value.find(device => device.device === selectedDevice.value) || null;
 };
-
 onMounted(() => {
   fetchDevices();
   fetchClientIp();
   setupAutoRefresh();
 });
-
 onUnmounted(() => {
   if (refreshInterval.value) {
     clearInterval(refreshInterval.value);
   }
 });
-
 </script>
 
 <template>
@@ -229,7 +240,7 @@ onUnmounted(() => {
                       type="date"
                       v-model="selectedDate"
                       class="px-3 py-2 border border-gray-300 dark:border-[#384456] rounded-md not-dark:shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
-                      :max="new Date().toISOString().split('T')[0]"
+                      :max=getMaxDate
                   />
                 </div>
               </div>
@@ -294,11 +305,11 @@ onUnmounted(() => {
           </p>
 
           <!-- GitHub链接 -->
-          <a href="https://github.com/1812z/RunTime_Tracker"
-             target="_blank"
+          <a href="https://github.com/1812z/RunTime_Tracker" target="_blank"
              class="flex items-center text-gray-600 hover:text-gray-100 hover:underline transition-colors duration-200">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+              <path
+                  d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
             </svg>
             GitHub
           </a>

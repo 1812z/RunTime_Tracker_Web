@@ -92,11 +92,11 @@ const calculateRunningTime = () => {
 
 // 格式化持续时间
 const formatDuration = (seconds) => {
-  if (seconds < 60) return `小于1分钟`;
+  if (seconds < 60) return `<1分`;
   if (seconds < 3600) return `${Math.floor(seconds / 60)}分`;
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
-  return `${hours}小时${minutes}分`;
+  return `${hours}时${minutes}分`;
 };
 
 // 生成颜色
@@ -361,8 +361,8 @@ watch(() => props.deviceInfo, () => {});
         </thead>
         <tbody class="not-dark:divide-y divide-gray-200">
         <tr v-for="usage in renderUsageDetails()" :key="usage.app">
-          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">{{ usage.app }}</td>
-          <td class="px-6 py-4 whitespace-nowrap">
+          <td class="w-auto max-w-[50%] py-3 whitespace-nowrap text-sm font-medium">{{ usage.app }}</td>
+          <td class="w-full max-w-[70%] px-6 py-3 whitespace-nowrap">
             <div class="flex flex-col gap-2">
               <!-- 进度条 -->
               <div class="w-full bg-gray-200 rounded-full h-3 md:h-2.5 dark:bg-[#25282a]">

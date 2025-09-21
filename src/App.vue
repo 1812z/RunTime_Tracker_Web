@@ -10,6 +10,11 @@ const selectedDevice = ref(null);
 const error = ref(null);
 const clientIp = ref('获取中...');
 const refreshInterval = ref(null);
+const toast = ref({
+  show: false,
+  message: '',
+  type: 'error' // 可以是 'error' 或 'success'
+});
 
 // 获取本地日期字符串
 const getLocalDateString = (date = new Date()) => {
@@ -46,16 +51,28 @@ const fetchClientIp = async () => {
 };
 
 // 获取设备列表
+const showToast = (message, type = 'error') => {
+  toast.value = { show: true, message, type };
+  setTimeout(() => {
+    toast.value.show = false;
+  }, 3000); // 3秒后自动消失
+};
+
+// 获取设备基础信息
 const fetchDevices = async () => {
   try {
     const response = await fetch(`${API_BASE}/devices`);
+    if (!response.ok) {
+      throw new Error(`请求失败: ${response.status}`);
+    }
     devices.value = await response.json();
-
     if (devices.value.length > 0 && !selectedDevice.value) {
       selectedDevice.value = devices.value[0].device;
     }
   } catch (err) {
-    error.value = `请求失败: ${err.message}`;
+    showToast(`获取设备列表失败: ${err.message}`);
+    console.error('获取设备列表错误:', err);
+    devices.value = [];
   }
 };
 
@@ -103,6 +120,27 @@ onUnmounted(() => {
 </script>
 
 <template>
+  <!-- Toast 提示 -->
+  <div v-if="toast.show" class="fixed top-4 right-4 z-50 w-auto transition-all duration-300" :class="{
+      'animate-fade-in': toast.show,
+      'animate-fade-out': !toast.show
+    }">
+    <div class="px-4 py-3 rounded-lg shadow-lg" :class="{
+        'bg-red-50 border border-red-200 text-red-700': toast.type === 'error',
+        'bg-green-50 border border-green-200 text-green-700': toast.type === 'success'
+      }">
+      <div class="flex items-start">
+        <svg v-if="toast.type === 'error'" class="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <svg v-else class="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span class="text-sm">{{ toast.message }}</span>
+      </div>
+    </div>
+  </div>
+  <!-- 主要模块 -->
   <div class="bg-gray-100 min-h-screen rounded-lg dark:bg-[#1e2022]">
     <div class="max-w-7xl mx-auto px-4">
       <h1 class="text-4xl font-bold text-center mb-8 flex items-center justify-center gap-3 pt-8">
@@ -111,7 +149,6 @@ onUnmounted(() => {
         </svg>
         设备使用时间统计
       </h1>
-
       <div class="flex flex-col lg:flex-row gap-6 pb-6">
         <!-- 左侧模块区 -->
         <div class="space-y-6">
@@ -262,10 +299,7 @@ onUnmounted(() => {
 
               <button v-if="selectedDevice" @click="refreshStats" class="px-3 py-1 text-sm bg-gray-100 rounded-md hover:bg-gray-200 transition-colorsdark:bg-gray-700 dark:bg-[#181a1b] dark:text-gray-200 dark:hover:bg-gray-700">
                 <span class="flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg"
-                    class="h-4 w-4 mr-1 stroke-current"
-                    fill="none"
-                    viewBox="0 0 24 24">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 stroke-current" fill="none" viewBox="0 0 24 24">
                   <path stroke-linecap="round"
                         stroke-linejoin="round"
                         stroke-width="2"

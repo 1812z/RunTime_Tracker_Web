@@ -8,43 +8,40 @@ const props = defineProps({
     required: true
   }
 });
-const rawApps = ref([]);
+const recentApps = ref([]);
 const loading = ref(false);
 const error = ref(null);
+
 // 计算处理后的应用数据
 const processedApps = computed(() => {
-  const now = new Date();
-  return rawApps.value.map((app, index, arr) => {
+  // 按时间戳降序排序
+  const sortedApps = [...recentApps.value].sort((a, b) =>
+      new Date(b.timestamp) - new Date(a.timestamp)
+  );
+
+  return sortedApps.map((app, index, arr) => {
     const startTime = new Date(app.timestamp);
     let endTime = null;
     let duration = null;
 
-    // 当前正在运行的应用
-    if (app.running) {
-      duration = Math.floor((now - startTime) / 1000); // 计算从开始到现在的秒数
-      return {
-        ...app,
-        startTime: app.timestamp,
-        endTime: null, // 表示仍在运行
-        duration: duration,
-        isRunning: true
-      };
+    // 如果是第一个应用且正在运行，则计算到当前时间的持续时间
+    if (app.running && index === 0) {
+      duration = Math.floor((new Date() - startTime) / 1000);
+    } else if (index > 0) {
+      // 结束时间是前一个应用的时间戳（因为现在是降序排序）
+      endTime = new Date(arr[index - 1].timestamp);
+      duration = Math.floor((endTime - startTime) / 1000);
     }
-    // 已经结束的应用
-    else {
-      // 结束时间是下一个应用的时间戳
-      endTime = index < arr.length - 1 ? new Date(arr[index + 1].timestamp) : now;
-      duration = Math.floor((endTime - startTime) / 1000); // 转换为秒
-      return {
-        ...app,
-        startTime: app.timestamp,
-        endTime: endTime.toISOString(),
-        duration: duration,
-        isRunning: false
-      };
-    }
+
+    return {
+      ...app,
+      startTime: app.timestamp,
+      endTime: endTime ? endTime.toISOString() : null,
+      duration: duration
+    };
   });
 });
+
 // 获取最近使用的应用
 const fetchRecentApps = async () => {
   try {
@@ -53,42 +50,36 @@ const fetchRecentApps = async () => {
     const response = await fetch(`${API_BASE}/recent/${props.deviceId}`);
     if (!response.ok) throw new Error('获取最近应用失败');
     const data = await response.json();
-    // 按时间降序排序（最新的在前面）
-    rawApps.value = data.data.sort((a, b) =>
-        new Date(b.timestamp) - new Date(a.timestamp)
-    );
+    // 不再反转数组，因为现在会在computed中排序
+    recentApps.value = data.data;
   } catch (err) {
     error.value = `获取最近应用失败: ${err.message}`;
   } finally {
     loading.value = false;
   }
 };
+
 // 格式化持续时间为更友好的显示
-const formatDuration = (seconds, isRunning) => {
-  if (isRunning && seconds === null) return '运行中';
+const formatDuration = (seconds) => {
+  if (seconds === null) return '设备待机';
   if (seconds < 60) return `${seconds}秒`;
   if (seconds < 3600) return `${Math.floor(seconds / 60)}分钟`;
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   return `${hours}小时${minutes}分钟`;
 };
+
 // 格式化时间为本地时间
 const formatTime = (isoString) => {
-  if (!isoString) return '运行中';
+  if (!isoString) return '未结束';
   const date = new Date(isoString);
   return date.toLocaleString();
 };
-// 自动刷新当前运行应用的持续时间
-const now = ref(new Date());
-onMounted(() => {
-  const interval = setInterval(() => {
-    now.value = new Date();
-  }, 1000); // 每秒更新一次
-  return () => clearInterval(interval);
-});
+
 onMounted(fetchRecentApps);
 watch(() => props.deviceId, fetchRecentApps);
 </script>
+
 <template>
   <div class="mt-8 rounded-lg border-2 border-gray-200 shadow-md p-6 relative dark:border-gray-700">
     <!-- 标题和刷新按钮 -->

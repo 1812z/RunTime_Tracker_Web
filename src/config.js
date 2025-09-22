@@ -1,9 +1,9 @@
 const config = {
     dev: {
-        API_BASE: 'http://127.0.0.1:3000/api'
+        API_BASE: 'https://api-usage.1812z.top/api'
     },
     prod: {
-        API_BASE: 'https://api-usage.1812z.top'
+        API_BASE: 'https://api-usage.1812z.top/api'
     }
 }
 

@@ -14,4 +14,4 @@ jobs:
         TARGET_REPO: 1812z/RunTime_Tracker_Web
         TARGET_BRANCH: master
         BUILD_SCRIPT: npm install && npm run build
-        BUILD_DIR: blog/.vuepress/dist/
+        BUILD_DIR: blog/.dist/

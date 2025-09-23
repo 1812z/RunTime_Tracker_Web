@@ -11,6 +11,8 @@ const props = defineProps({
 const recentApps = ref([]);
 const loading = ref(false);
 const error = ref(null);
+const isExpanded = ref(false); // 控制展开收起状态
+const showLimit = ref(5); // 默认显示的条数
 
 // 计算处理后的应用数据
 const processedApps = computed(() => {
@@ -41,6 +43,24 @@ const processedApps = computed(() => {
     };
   });
 });
+
+// 计算要显示的应用列表
+const displayedApps = computed(() => {
+  if (isExpanded.value || processedApps.value.length <= showLimit.value) {
+    return processedApps.value;
+  }
+  return processedApps.value.slice(0, showLimit.value);
+});
+
+// 是否需要显示展开/收起按钮
+const shouldShowToggle = computed(() => {
+  return processedApps.value.length > showLimit.value;
+});
+
+// 切换展开/收起状态
+const toggleExpanded = () => {
+  isExpanded.value = !isExpanded.value;
+};
 
 // 获取最近使用的应用
 const fetchRecentApps = async () => {
@@ -114,24 +134,48 @@ watch(() => props.deviceId, fetchRecentApps);
         暂无最近使用应用记录
       </div>
 
-      <table v-if="recentApps.length > 0" class="min-w-full not-dark:divide-y divide-gray-200">
-        <thead>
-        <tr>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">应用</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">开始时间</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">结束时间</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">持续时间</th>
-        </tr>
-        </thead>
-        <tbody class="not-dark:divide-y divide-gray-50">
-        <tr v-for="app in processedApps" :key="app._id">
-          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium  truncate max-w-xs">{{ app.appName }}</td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm ">{{ formatTime(app.startTime) }}</td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm ">{{ app.endTime ? formatTime(app.endTime) : '运行中' }}</td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm ">{{ formatDuration(app.duration) }}</td>
-        </tr>
-        </tbody>
-      </table>
+      <div v-if="recentApps.length > 0">
+        <!-- 应用表格 -->
+        <table class="min-w-full not-dark:divide-y divide-gray-200">
+          <thead>
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">应用</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">开始时间</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">结束时间</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">持续时间</th>
+          </tr>
+          </thead>
+          <tbody  class="not-dark:divide-y divide-gray-50">
+          <tr v-for="app in displayedApps" :key="app._id">
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium truncate max-w-xs">{{ app.appName }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm">{{ formatTime(app.startTime) }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm">{{ app.endTime ? formatTime(app.endTime) : '运行中' }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm">{{ formatDuration(app.duration) }}</td>
+          </tr>
+          </tbody>
+        </table>
+
+        <!-- 展开/收起按钮 -->
+        <div v-if="shouldShowToggle" class="flex justify-center mt-4">
+          <button
+              @click="toggleExpanded"
+              class="flex items-center px-4 py-2 text-sm text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors duration-200 dark:text-blue-400 dark:bg-blue-900/20 dark:hover:bg-blue-900/30"
+          >
+            <template v-if="isExpanded">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+              </svg>
+              收起 (显示前{{ showLimit }}条)
+            </template>
+            <template v-else>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+              展开查看全部 ({{ processedApps.length }}条)
+            </template>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -145,4 +189,5 @@ watch(() => props.deviceId, fetchRecentApps);
     white-space: nowrap;
   }
 }
+
 </style>

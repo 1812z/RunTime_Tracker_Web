@@ -16,6 +16,8 @@ import {
 } from 'chart.js';
 import config from '../config.js'
 import RecentApps from "./RecentApps.vue";
+import UsageDetails from "./UsageDetails.vue";
+
 const API_BASE = config.API_BASE
 
 // 注册 Chart.js 组件
@@ -231,19 +233,6 @@ const updateCharts = () => {
   });
 };
 
-// 渲染详细使用数据
-const renderUsageDetails = () => {
-  if (!stats.value?.appStats) return [];
-
-  return Object.entries(stats.value.appStats)
-      .map(([app, duration]) => ({
-        app,
-        duration,
-        formattedDuration: formatDuration(duration * 60)
-      }))
-      .sort((a, b) => b.duration - a.duration);
-};
-
 // 计算设备统计信息
 const getDeviceStats = () => {
   if (!stats.value) return null;
@@ -286,7 +275,6 @@ watch(() => props.deviceInfo, () => {});
 </script>
 
 <template>
-  <!-- 保持原有模板不变 -->
   <!-- 错误信息 -->
   <div v-if="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
     {{ error }}
@@ -294,19 +282,19 @@ watch(() => props.deviceInfo, () => {});
 
   <!-- 设备统计概览 -->
   <div v-if="stats" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-    <div class="bg-blue-50 info-block dark:bg-blue-950">
+    <div class="bg-blue-50 hover:bg-blue-100 transition-colors duration-200 info-block dark:bg-blue-950 dark:hover:bg-blue-900">
       <p class="text-sm text-blue-700">应用总数</p>
       <p class="text-2xl font-bold">{{ getDeviceStats().appCount }}</p>
     </div>
-    <div class="bg-green-50 info-block dark:bg-green-950">
+    <div class="bg-green-50 hover:bg-green-100 transition-colors duration-200 info-block dark:bg-green-950 dark:hover:bg-green-900">
       <p class="text-sm text-green-700">总时间</p>
       <p class="text-2xl font-bold">{{ getDeviceStats().totalUsageHours }}小时</p>
     </div>
-    <div class="bg-yellow-50 info-block dark:bg-yellow-950">
+    <div class="bg-yellow-50 hover:bg-yellow-100 transition-colors duration-200 info-block dark:bg-yellow-950 dark:hover:bg-yellow-900">
       <p class="text-sm text-yellow-700">最常用</p>
-      <p class="text-2xl font-bold truncate" :title="getDeviceStats().topApp">{{ getDeviceStats().topApp }}</p>
+      <p class="text-2xl font-bold truncate" :title="getDeviceStats().topApp">{{ getDeviceStats().topApp || "暂无" }}</p>
     </div>
-    <div class="bg-purple-50 info-block dark:bg-purple-950">
+    <div class="bg-purple-50 hover:bg-purple-100 transition-colors duration-200 info-block dark:bg-purple-950 dark:hover:bg-purple-900">
       <p class="text-sm text-purple-700">最活跃时段</p>
       <p class="text-2xl font-bold">{{ getDeviceStats().busiestHour }}时</p>
     </div>
@@ -314,7 +302,7 @@ watch(() => props.deviceInfo, () => {});
 
   <!-- 当前使用情况 -->
   <div v-if="deviceInfo?.currentApp" class="mb-6">
-    <div class="bg-blue-50 p-4 rounded-lg shadow-md dark:bg-[#1d1f20]">
+    <div class="bg-blue-50 hover:bg-blue-100 transition-colors duration-200 p-4 rounded-lg shadow-md dark:bg-[#1d1f20] dark:hover:bg-blue-900/30">
       <div class="flex items-center justify-between">
         <div>
           <p class="text-sm text-blue-800">{{ deviceInfo.running ? '当前应用' : '上次应用' }}</p>
@@ -348,42 +336,13 @@ watch(() => props.deviceInfo, () => {});
     </div>
   </div>
 
-  <!-- 详细使用数据 -->
-  <div v-if="stats" class="rounded-lg border-2 border-gray-200 shadow-md p-6 mb-6 dark:bg-[#181a1b] dark:border-gray-700">
-    <h3 class="text-lg font-medium mb-4">详细使用数据</h3>
-    <div class="overflow-x-auto">
-      <table class="min-w-full not-dark:divide-y divide-gray-200">
-        <thead>
-        <tr>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">应用</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">使用时间</th>
-        </tr>
-        </thead>
-        <tbody class="not-dark:divide-y divide-gray-200">
-        <tr v-for="usage in renderUsageDetails()" :key="usage.app">
-          <td class="w-auto max-w-[50%] py-3 whitespace-nowrap text-sm font-medium">{{ usage.app }}</td>
-          <td class="w-full max-w-[70%] px-6 py-3 whitespace-nowrap">
-            <div class="flex flex-col gap-2">
-              <!-- 进度条 -->
-              <div class="w-full bg-gray-200 rounded-full h-3 md:h-2.5 dark:bg-[#25282a]">
-                <div
-                    class="bg-blue-600 h-full rounded-full transition-all duration-500 min-w-[0.25rem]"
-                    :style="{ width: `${((usage.duration / getDeviceStats().totalUsageMinutes) * 100)}%` }"
-                ></div>
-              </div>
-              <!-- 使用时间和占比 -->
-              <div class="flex items-center justify-between text-xs text-gray-500">
-                <span>{{ usage.formattedDuration }}</span>
-                <span>{{ Math.round((usage.duration / getDeviceStats().totalUsageMinutes) * 100) }}%</span>
-              </div>
-            </div>
-          </td>
-        </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
+  <!-- 使用详细使用数据组件 -->
+  <UsageDetails :stats="stats" :show-limit="10" />
 
+  <!-- 最近使用的APP组件 -->
   <RecentApps :deviceId="deviceId" />
 
 </template>
+<style scoped>
+
+</style>

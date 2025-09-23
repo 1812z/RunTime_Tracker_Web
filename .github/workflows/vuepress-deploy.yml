@@ -13,5 +13,5 @@ jobs:
         ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         TARGET_REPO: 1812z/RunTime_Tracker_Web
         TARGET_BRANCH: master
-        BUILD_SCRIPT: npm run build
+        BUILD_SCRIPT: npm install && npm run build
         BUILD_DIR: blog/.vuepress/dist/

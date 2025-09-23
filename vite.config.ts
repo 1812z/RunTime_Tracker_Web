@@ -7,5 +7,6 @@ export default defineConfig({
     plugins: [
         vue(),
         tailwindcss()
-    ]
+    ],
+    base: '/RunTime_Tracker_Web/'
 })

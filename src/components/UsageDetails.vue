@@ -85,7 +85,7 @@ const toggleExpanded = () => {
               <!-- 使用时间和占比 -->
               <div class="flex items-center justify-between text-xs text-gray-500">
                 <span>{{ usage.formattedDuration }}</span>
-                <span>{{ Math.round((usage.duration / totalUsageMinutes) * 100) || "?" }}%</span>
+                <span>{{ Math.round((usage.duration / totalUsageMinutes) * 100) || "0" }}%</span>
               </div>
             </div>
           </td>

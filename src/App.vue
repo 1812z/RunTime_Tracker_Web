@@ -211,7 +211,7 @@ onUnmounted(() => {
                   </svg>
                   设备列表
                 </h2>
-                <button @click="fetchDevices" class="px-3 py-1 text-sm bg-gray-100 rounded-md hover:bg-gray-200 transition-colors dark:bg-[#181a1b] dark:text-gray-200 dark:hover:bg-gray-700">
+                <button @click="fetchDevices" class="px-3 py-1 text-sm bg-gray-100 rounded-md hover:bg-gray-200 transition-colors dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700">
                   <span class="flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -300,7 +300,7 @@ onUnmounted(() => {
                 <span v-else>请选择设备查看统计</span>
               </h2>
 
-              <button v-if="selectedDevice" @click="refreshStats" class="px-3 py-1 text-sm bg-gray-100 rounded-md hover:bg-gray-200 transition-colorsdark:bg-gray-700 dark:bg-[#181a1b] dark:text-gray-200 dark:hover:bg-gray-700">
+              <button v-if="selectedDevice" @click="refreshStats" class="px-3 py-1 text-sm bg-gray-100 rounded-md hover:bg-gray-200 transition-colorsdark:bg-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700">
                 <span class="flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 stroke-current" fill="none" viewBox="0 0 24 24">
                   <path stroke-linecap="round"
@@ -338,7 +338,7 @@ onUnmounted(() => {
 
           <!-- 版权信息 -->
           <p class="text-gray-500 text-sm mr-4 dark:text-gray-400">
-            © 2025 Runtime Tracker V0.1
+            © 2025 Runtime Tracker V0.2
           </p>
 
           <!-- GitHub链接 -->

@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import { useStats } from '../composables/useStats.js';
-import StatsTypeSwitcher from "./StatsTypeSwitcher.vue";
+
 import RecentApps from "./RecentApps.vue";
 import UsageDetails from "./UsageDetails.vue";
 import AppUsageChart from "./charts/AppUsageChart.vue";
@@ -16,24 +16,35 @@ const props = defineProps({
     type: Object,
     default: null
   },
+  statsType: {
+    type: String,
+    default: 'daily'
+  },
+  timeOffset: {
+    type: Number,
+    default: 0
+  },
   date: {
     type: String,
-    default: null
+    default: ''
   }
 });
 
-const { stats, error, loading, fetchStats } = useStats();
+// 定义 emits
+const emit = defineEmits(['stats-update']);
 
-const statsType = ref('daily');
-const timeOffset = ref(0);
+const { stats, error, loading, fetchStats } = useStats();
 
 // 加载统计数据
 const loadStats = async () => {
   await fetchStats(props.deviceId, {
-    type: statsType.value,
-    offset: timeOffset.value,
+    type: props.statsType,
+    offset: props.timeOffset,
     date: props.date
   });
+
+  // 向父组件发送统计数据更新事件
+  emit('stats-update', stats.value);
 };
 
 // 计算运行时间（分钟）
@@ -94,35 +105,22 @@ const getDeviceStats = () => {
   };
 };
 
-const getDateRangeText = () => {
-  if (!stats.value?.dateRange) return '';
-
-  const { start, end } = stats.value.dateRange;
-  if (start === end) {
-    return start;
-  }
-  return `${start} 至 ${end}`;
-};
 
 onMounted(loadStats);
 
 watch(() => props.deviceId, loadStats);
-watch(() => props.date, () => {
-  if (statsType.value === 'daily') {
-    loadStats();
+watch(() => props.statsType, loadStats);
+watch(() => props.timeOffset, loadStats);
+
+// 监听stats变化并向父组件发送更新事件
+watch(stats, (newStats) => {
+  if (newStats) {
+    emit('stats-update', newStats);
   }
-});
-watch(statsType, loadStats);
-watch(timeOffset, loadStats);
+}, { deep: true });
 </script>
 
 <template>
-  <StatsTypeSwitcher
-      v-model="statsType"
-      v-model:offset="timeOffset"
-      :date-range-text="getDateRangeText()"
-  />
-
   <!-- 错误信息 -->
   <div v-show="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
     {{ error }}
@@ -130,7 +128,6 @@ watch(timeOffset, loadStats);
 
   <!-- 主要内容区域 -->
   <div>
-
     <!-- 设备统计概览 -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
       <div class="bg-blue-50 hover:bg-blue-100 transition-colors duration-200 p-4 rounded-lg shadow-md dark:bg-blue-950 dark:hover:bg-blue-900">
@@ -154,7 +151,7 @@ watch(timeOffset, loadStats);
     </div>
 
     <!-- 当前使用情况 -->
-    <div v-show="statsType === 'daily' && deviceInfo?.currentApp" class="mb-6">
+    <div class="mb-6">
       <div class="bg-blue-50 hover:bg-blue-100 transition-colors duration-200 p-4 rounded-lg shadow-md dark:bg-[#1d1f20] dark:hover:bg-blue-900/30">
         <div class="flex items-center justify-between">
           <div>
@@ -190,6 +187,6 @@ watch(timeOffset, loadStats);
     <UsageDetails :stats="stats || {}" :show-limit="10" />
 
     <!-- 最近使用的APP组件 -->
-    <RecentApps v-show="statsType === 'daily'" :deviceId="deviceId" />
+    <RecentApps v-show="props.statsType === 'daily'" :deviceId="deviceId" />
   </div>
 </template>

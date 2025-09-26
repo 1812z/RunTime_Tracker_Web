@@ -215,7 +215,6 @@ export function useStats() {
      */
     const fetchStats = async (deviceId, options = {}) => {
         const { type = 'daily', offset = 0, date = null } = options;
-        console.log(`获取${date}统计数据...`);
         switch (type) {
             case 'daily':
                 await fetchDailyStats(deviceId, date);

@@ -7,10 +7,10 @@ const props = defineProps({
 </script>
 
 <template>
-  <footer class="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-sm border-t border-gray-200 py-2 not-dark:shadow-sm dark:bg-[#34383a] dark:border-gray-950">
+  <footer class="bottom-0 left-0 right-0 py-2">
     <div class="container mx-auto flex justify-center items-center px-4">
       <!-- IP地址显示 -->
-      <div class="flex items-center bg-gray-100 rounded-full px-3 py-1 text-sm mr-4 dark:bg-[#1e2022]">
+      <div class="flex items-center px-3 py-1 text-sm mr-4">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
         </svg>

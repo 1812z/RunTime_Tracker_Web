@@ -174,7 +174,6 @@ const getTimeRangeText = () => {
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
-
             模式
           </h2>
           <Transition name="fade" mode="out-in">
@@ -216,7 +215,7 @@ const getTimeRangeText = () => {
             </svg>
           </button>
 
-          <div class="flex items-center justify-center min-w-[200px] h-8">
+          <div class="flex items-center justify-center min-w-[160px] h-8">
             <Transition name="fade" mode="out-in">
                 <span v-if="statsType !== 'daily'"
                       key="time-range"
@@ -255,13 +254,13 @@ const getTimeRangeText = () => {
       <div class="flex flex-col gap-3 mt-2 md:hidden lg:flex lg:flex-col">
         <!-- 居中并占满 -->
         <div class="flex justify-center w-full">
-          <div class="inline-flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1 shadow-inner w-full sm:w-auto sm:max-w-md justify-between items-center">
+          <div class="inline-flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1 shadow-inner  w-auto justify-between items-center">
             <button
                 v-for="type in statsTypes"
                 :key="type.value"
                 @click="statsType = type.value"
                 :class="[
-                  'flex-1 sm:flex-none whitespace-nowrap px-7 py-3 sm:px-4 sm:py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center justify-center',
+                  'flex-1 sm:flex-none whitespace-nowrap px-5 py-2.5 sm:px-6 sm:py-3 rounded-md text-sm font-medium transition-all duration-200 flex items-center justify-center',
                   statsType === type.value
                     ? 'bg-blue-500 text-white shadow-sm'
                     : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
@@ -276,7 +275,7 @@ const getTimeRangeText = () => {
       </div>
 
       <!-- 手机模式和电脑模式：时间范围选择器 -->
-      <div class="flex items-center justify-center gap-2 sm:gap-8 mt-2 md:hidden lg:flex">
+      <div class="flex items-center justify-center gap-2 sm:gap-4 mt-2 md:hidden lg:flex">
         <button
             @click="decreaseOffset"
             class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200 shadow-sm"

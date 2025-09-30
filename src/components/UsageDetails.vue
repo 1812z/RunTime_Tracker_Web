@@ -66,11 +66,12 @@ const toggleExpanded = () => {
       <table class="min-w-full not-dark:divide-y divide-gray-200">
         <thead>
         <tr>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">应用</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">使用时间</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider not-sm:hidden">应用</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider not-sm:hidden">使用时间</th>
         </tr>
+        <!-- PC/平板设备并排显示 -->
         </thead>
-        <tbody class="not-dark:divide-y divide-gray-200">
+        <tbody class="not-dark:divide-y divide-gray-200 not-sm:hidden">
         <tr v-for="usage in displayedApps" :key="usage.app">
           <td class="w-auto max-w-[50%] py-3 whitespace-nowrap text-sm font-medium">{{ usage.app }}</td>
           <td class="w-full max-w-[70%] px-6 py-3 whitespace-nowrap">
@@ -81,9 +82,31 @@ const toggleExpanded = () => {
                     class="bg-blue-600 h-full rounded-full transition-all duration-500 min-w-[0.25rem]"
                     :style="{ width: `${((usage.duration / totalUsageMinutes) * 100)}%` }"
                 ></div>
+
               </div>
               <!-- 使用时间和占比 -->
               <div class="flex items-center justify-between text-xs text-gray-500">
+                <span>{{ usage.formattedDuration }}</span>
+                <span>{{ Math.round((usage.duration / totalUsageMinutes) * 100) || "0" }}%</span>
+              </div>
+            </div>
+          </td>
+        </tr>
+        </tbody>
+        <!-- 手机设备分2行显示 -->
+        <tbody class="not-dark:divide-y divide-gray-200 sm:hidden">
+        <tr v-for="usage in displayedApps" :key="usage.app">
+          <!-- 调整为垂直布局 -->
+          <td class="w-full py-1">
+            <div class="flex flex-col gap-1">
+              <div class="text-sm font-medium">{{ usage.app }}</div>
+              <div class="w-full bg-gray-200 rounded-full h-4 dark:bg-[#25282a]">
+                <div
+                    class="bg-blue-600 h-full rounded-full transition-all duration-500 min-w-[0.25rem]"
+                    :style="{ width: `${((usage.duration / totalUsageMinutes) * 100)}%` }"
+                ></div>
+              </div>
+              <div class="flex items-center justify-between text-sm text-gray-500">
                 <span>{{ usage.formattedDuration }}</span>
                 <span>{{ Math.round((usage.duration / totalUsageMinutes) * 100) || "0" }}%</span>
               </div>

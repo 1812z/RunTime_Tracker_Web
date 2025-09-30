@@ -129,7 +129,7 @@ watch(stats, (newStats) => {
   <!-- 主要内容区域 -->
   <div>
     <!-- 设备统计概览 -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
       <div class="bg-blue-50 hover:bg-blue-100 transition-colors duration-200 p-4 rounded-lg shadow-md dark:bg-blue-950 dark:hover:bg-blue-900">
         <p class="text-sm text-blue-700">应用总数</p>
         <p class="text-2xl font-bold">{{ getDeviceStats().appCount }}</p>

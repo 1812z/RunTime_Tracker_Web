@@ -80,8 +80,15 @@ const initChart = () => {
         },
         tooltip: {
           callbacks: {
-            label: function(context) {
-              return `${context.parsed.y} 分钟`;
+            label: function (context) {
+              const value = context.parsed.y || 0;
+              if (value < 60) {
+                return `${value.toFixed(2)}分钟`;
+              } else {
+                const hours = Math.floor(value / 60);
+                const minutes = Math.round(value % 60);
+                return `${hours}小时`;
+              }
             }
           }
         }

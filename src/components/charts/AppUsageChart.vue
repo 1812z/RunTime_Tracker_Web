@@ -94,7 +94,15 @@ const handleAppUsageChart = () => {
                 const value = context.raw || 0;
                 const total = context.dataset.data.reduce((a, b) => a + b, 0);
                 const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
-                return `${label}: ${value}分钟 (${percentage}%)`;
+                let timeString;
+                if (value < 60) {
+                  timeString = `${value.toFixed(2)}分钟`;
+                } else {
+                  const hours = Math.floor(value / 60);
+                  const minutes = Math.round(value % 60);
+                  timeString = `${hours}小时${minutes}分钟`;
+                }
+                return `${label}: ${timeString} (${percentage}%)`;
               }
             }
           }

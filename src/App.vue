@@ -1,11 +1,12 @@
-<!--suppress HtmlDeprecatedAttribute -->
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import DeviceStats from './components/DeviceStats.vue';
+import DeviceList from './components/DeviceList.vue';
 import config from './config.js'
 import GiscusComments from './components/GiscusComments.vue';
 import Footer from "./components/Footer.vue";
 import DateSelector from "./components/DateSelector.vue";
+
 const API_BASE = config.API_BASE
 const devices = ref([]);
 const selectedDevice = ref(null);
@@ -33,15 +34,6 @@ const statsType = ref('daily');
 const timeOffset = ref(0);
 const stats = ref(null); // 用于获取dateRange信息
 
-// // 添加日期转换函数
-// const localDateToUTC = (localDate) => {
-//   const date = new Date(localDate);
-//   // 添加时区偏移量以确保获取UTC日期
-//   date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
-//   return date.toISOString().split('T')[0];
-// };
-//
-
 // 获取客户端IP
 const fetchClientIp = async () => {
   try {
@@ -54,7 +46,7 @@ const fetchClientIp = async () => {
   }
 };
 
-// 获取设备列表
+// Toast提示
 const showToast = (message, type = 'error') => {
   toast.value = { show: true, message, type };
   setTimeout(() => {
@@ -191,7 +183,6 @@ onUnmounted(() => {
               </div>
               <div class="border border-gray-200 dark:border-[#384456] rounded-lg p-4 text-center not-dark:shadow-md">
                 <h3 class="text-gray-500 text-sm font-medium flex items-center justify-center gap-1">
-                  <!--suppress HtmlDeprecatedAttribute -->
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
                   </svg>
@@ -209,69 +200,13 @@ onUnmounted(() => {
 
           <!-- 设备列表 -->
           <div class="sticky top-4">
-            <div class="bg-white rounded-lg not-dark:shadow-md p-6 dark:bg-[#181a1b]">
-              <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-semibold flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
-                  设备列表
-                </h2>
-                <button @click="fetchDevices" class="px-3 py-1 text-sm bg-gray-100 rounded-md hover:bg-gray-200 transition-colors dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700">
-                  <span class="flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    刷新
-                  </span>
-                </button>
-              </div>
-              <div id="devicesList" class="space-y-3">
-                <!-- 设备卡片将通过JS动态加载 -->
-                <div v-if="devices.length === 0" class="text-center py-8 text-gray-400">暂无设备数据</div>
-                <div
-                    v-for="device in devices"
-                    :key="device.device"
-                    @click="selectDevice(device.device)"
-                    class="border rounded-lg p-4 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-all duration-200 cursor-pointer dark:border-[#384456]"
-                    :class="{'ring-2 ring-blue-500 dark:ring-gray-700': selectedDevice === device.device}"
-                >
-                  <div class="flex justify-between items-start">
-                    <div>
-                      <h3 class="font-bold text-lg">{{ device.device }}</h3>
-                      <p class="not-dark:text-gray-600 text-sm mt-1">
-                        <span class="font-medium">当前应用:</span> {{ device.currentApp || '无' }}
-                      </p>
-                      <!-- 电量显示 -->
-                      <div v-if="device.batteryLevel > 0" class="flex items-center mt-1">
-                        <span class="text-gray-600 text-sm font-medium mr-1">电量:</span>
-                        <div class="relative">
-                          <!-- 电池外壳 -->
-                          <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              class="h-4 w-6"
-                              viewBox="0 0 24 12"
-                              fill="none"
-                              stroke="#6b7280"
-                              stroke-width="1.5"
-                          >
-                            <!-- 电池主体 -->
-                            <rect x="0.5" y="0.5" width="18" height="11" rx="1.5" />
-                            <!-- 电池正极 -->
-                            <rect x="19" y="3" width="2" height="6" rx="0.5" />
-                          </svg>
-                        </div>
-                        <span class="text-gray-600 text-xs ml-1">{{ device.batteryLevel }}%</span>
-                      </div>
-                    </div>
-                    <span class="inline-block px-2 py-1 text-xs rounded-full"
-                          :class="device.running ? 'bg-green-100 not-dark:text-green-800 dark:bg-green-950' : 'bg-red-100 not-dark:text-red-800 dark:bg-red-950'">
-                      {{ device.running ? '运行中' : '已停止' }}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <DeviceList
+                :devices="devices"
+                :selected-device="selectedDevice"
+                @select-device="selectDevice"
+                @refresh-devices="fetchDevices"
+            />
+
             <!-- 日期筛选组件 -->
             <DateSelector
                 v-model="statsType"
@@ -282,7 +217,7 @@ onUnmounted(() => {
           </div>
         </div>
         <!-- 右侧统计 -->
-        <div class="flex-1 min-w-0"> <!-- 使用 flex-1 和 min-w-0 防止溢出 -->
+        <div class="flex-1 min-w-0">
           <div class="bg-white rounded-lg not-dark:shadow-md p-6 sticky top-40 dark:bg-[#181a1b]">
             <div class="flex justify-between items-center mb-4">
               <h2 class="text-xl font-semibold flex items-center gap-2">
@@ -293,13 +228,10 @@ onUnmounted(() => {
                 <span v-else>请选择设备查看统计</span>
               </h2>
 
-              <button v-if="selectedDevice" @click="refreshStats" class="px-3 py-1 text-sm bg-gray-100 rounded-md hover:bg-gray-200 transition-colorsdark:bg-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700">
+              <button v-if="selectedDevice" @click="refreshStats" class="px-3 py-1 text-sm bg-gray-100 rounded-md hover:bg-gray-200 transition-colors dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700">
                 <span class="flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 stroke-current" fill="none" viewBox="0 0 24 24">
-                  <path stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                   </svg>
                   刷新
                 </span>
@@ -322,12 +254,11 @@ onUnmounted(() => {
           </div>
         </div>
       </div>
-      <Footer :client-ip=clientIp></Footer>
+
+      <Footer :client-ip="clientIp"></Footer>
     </div>
   </div>
 </template>
 
 <style scoped>
-
-
 </style>

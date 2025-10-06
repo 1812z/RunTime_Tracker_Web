@@ -144,21 +144,21 @@ watch(stats, (newStats) => {
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
       <div class="bg-blue-50 hover:bg-blue-100 transition-colors duration-200 p-4 rounded-lg shadow-md dark:bg-blue-950 dark:hover:bg-blue-900">
         <p class="text-sm text-blue-700">应用总数</p>
-        <p class="text-2xl font-bold">{{ getDeviceStats().appCount }}</p>
+        <p class="text-xl md:text-2xl font-bold">{{ getDeviceStats().appCount }}</p>
       </div>
       <div class="bg-green-50 hover:bg-green-100 transition-colors duration-200 p-4 rounded-lg shadow-md dark:bg-green-950 dark:hover:bg-green-900">
         <p class="text-sm text-green-700">总时间</p>
-        <p class="text-2xl font-bold">{{ formatTime(getDeviceStats().totalUsageMinutes) }}</p>
+        <p class="text-xl md:text-2xl font-bold whitespace-nowrap">{{ formatTime(getDeviceStats().totalUsageMinutes) }}</p>
       </div>
       <div class="bg-yellow-50 hover:bg-yellow-100 transition-colors duration-200 p-4 rounded-lg shadow-md dark:bg-yellow-950 dark:hover:bg-yellow-900">
         <p class="text-sm text-yellow-700">最常用</p>
-        <p class="text-2xl font-bold truncate" :title="getDeviceStats().topApp">
+        <p class="text-xl md:text-2xl font-bold whitespace-nowrap truncate" :title="getDeviceStats().topApp">
           {{ getDeviceStats().topApp || "暂无" }}
         </p>
       </div>
       <div class="bg-purple-50 hover:bg-purple-100 transition-colors duration-200 p-4 rounded-lg shadow-md dark:bg-purple-950 dark:hover:bg-purple-900">
         <p class="text-sm text-purple-700">最活跃时段</p>
-        <p class="text-2xl font-bold">{{ getDeviceStats().busiestLabel || '-' }}</p>
+        <p class="text-xl md:text-2xl font-bold">{{ getDeviceStats().busiestLabel || '-' }}</p>
       </div>
     </div>
 

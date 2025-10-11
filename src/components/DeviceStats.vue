@@ -6,6 +6,7 @@ import RecentApps from "./RecentApps.vue";
 import UsageDetails from "./UsageDetails.vue";
 import AppUsageChart from "./charts/AppUsageChart.vue";
 import TimeUsageChart from "./charts/TimeUsageChart.vue";
+import AISummary from "./AISummary.vue";
 
 const props = defineProps({
   deviceId: {
@@ -181,6 +182,8 @@ watch(stats, (newStats) => {
         </div>
       </div>
     </div>
+
+    <AISummary :deviceId="deviceId" />
 
     <!-- 图表组件 -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">

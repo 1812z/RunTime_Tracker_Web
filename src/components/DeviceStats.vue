@@ -36,6 +36,9 @@ const emit = defineEmits(['stats-update']);
 
 const { stats, error, loading, fetchStats } = useStats();
 
+// AI总结展开状态 - 在设备切换时保持
+const isAISummaryExpanded = ref(false);
+
 // 加载统计数据
 const loadStats = async () => {
   await fetchStats(props.deviceId, {
@@ -106,7 +109,6 @@ const getDeviceStats = () => {
     maxUsage = stats.value.timeStats[maxIndex];
   }
 
-
   return {
     appCount,
     totalUsageMinutes,
@@ -117,7 +119,6 @@ const getDeviceStats = () => {
     maxUsage
   };
 };
-
 
 onMounted(loadStats);
 
@@ -183,7 +184,11 @@ watch(stats, (newStats) => {
       </div>
     </div>
 
-    <AISummary :deviceId="deviceId" />
+    <!-- AI总结组件 - 支持双向绑定展开状态 -->
+    <AISummary
+        :device-id="deviceId"
+        v-model:is-expanded="isAISummaryExpanded"
+    />
 
     <!-- 图表组件 -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">

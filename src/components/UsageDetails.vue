@@ -53,6 +53,11 @@ const shouldShowToggle = computed(() => {
   return processedApps.value.length > props.showLimit;
 });
 
+// 是否有数据
+const hasData = computed(() => {
+  return processedApps.value.length > 0;
+});
+
 // 切换展开/收起状态
 const toggleExpanded = () => {
   isExpanded.value = !isExpanded.value;
@@ -60,7 +65,7 @@ const toggleExpanded = () => {
 </script>
 
 <template>
-  <div v-if="stats" class="rounded-lg border-2 border-gray-200 shadow-md p-6 mb-6 dark:bg-[#181a1b] dark:border-gray-700">
+  <div class="rounded-lg border-2 border-gray-200 shadow-md p-6 mb-6 dark:bg-[#181a1b] dark:border-gray-700">
     <h3 class="text-lg font-medium mb-4">详细使用数据</h3>
     <div class="overflow-x-auto">
       <table class="min-w-full not-dark:divide-y divide-gray-200">
@@ -115,6 +120,10 @@ const toggleExpanded = () => {
         </tr>
         </tbody>
       </table>
+    </div>
+
+    <div v-if="!hasData" class="flex flex-col items-center justify-center min-h-[100px]">
+      <span class="text-gray-400 text-lg">暂无数据</span>
     </div>
 
     <!-- 展开/收起按钮 -->

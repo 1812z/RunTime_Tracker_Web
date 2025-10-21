@@ -63,11 +63,11 @@ const calculateRunningTime = () => {
 const formatTime = (minutes) => {
   const totalMinutes = parseFloat(minutes);
   if (totalMinutes < 60) {
-    return `${totalMinutes.toFixed(2)}分钟`;
+    return `${totalMinutes.toFixed(2)}分`;
   } else {
     const hours = Math.floor(totalMinutes / 60);
     const remainingMinutes = Math.round(totalMinutes % 60);
-    return `${hours}小时${remainingMinutes}分钟`;
+    return `${hours}时${remainingMinutes}分`;
   }
 };
 

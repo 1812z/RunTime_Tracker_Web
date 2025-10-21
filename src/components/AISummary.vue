@@ -92,7 +92,7 @@ watch(() => props.deviceId, () => {
       <!-- 折叠标题栏 -->
       <button
           @click="toggleExpanded"
-          class="w-full p-4 flex items-center justify-between hover:bg-white/50 dark:hover:bg-white/5 transition-colors"
+          class="w-full p-4 flex items-center justify-between hover:bg-purple-100 dark:hover:bg-white/5 transition-colors"
       >
         <div class="flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

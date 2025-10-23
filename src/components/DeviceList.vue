@@ -1,25 +1,18 @@
 <script setup>
 
-// 定义 props
 const props = defineProps({
   devices: {
     type: Array,
     required: true,
     default: () => []
-  },
-  selectedDevice: {
-    type: String,
-    default: null
   }
 });
 
-// 定义 emits
-const emit = defineEmits(['select-device', 'refresh-devices']);
+// 刷新设备
+const emit = defineEmits(['refresh-devices']);
 
-// 选择设备
-const selectDevice = (deviceId) => {
-  emit('select-device', deviceId);
-};
+// 当前选择的设备
+let selectedDevice = defineModel('selectedDevice')
 
 // 刷新设备列表
 const handleRefresh = () => {
@@ -81,9 +74,9 @@ const getBatteryTextClass = (level, isCharging) => {
       <div
           v-for="device in devices"
           :key="device.device"
-          @click="selectDevice(device.device)"
+          @click="selectedDevice = device.device"
           class="border rounded-lg p-4 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-all duration-200 cursor-pointer dark:border-[#384456]"
-          :class="{'ring-2 ring-blue-500 dark:ring-gray-700': selectedDevice === device.device}"
+          :class="{'ring-2 ring-blue-500 dark:ring-blue-300/50': selectedDevice === device.device}"
       >
         <div class="flex justify-between items-start">
           <div class="flex-1">

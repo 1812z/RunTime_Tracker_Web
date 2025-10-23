@@ -29,7 +29,7 @@ const getLocalDateString = (date = new Date()) => {
 // 使用本地日期初始化
 const selectedDate = ref(getLocalDateString());
 
-// 日期筛选相关状态 - 从DeviceStats迁移过来
+// 日期筛选相关状态
 const statsType = ref('daily');
 const timeOffset = ref(0);
 const stats = ref(null); // 用于获取dateRange信息
@@ -70,11 +70,6 @@ const fetchDevices = async () => {
     console.error('获取设备列表错误:', err);
     devices.value = [];
   }
-};
-
-// 选择设备
-const selectDevice = (deviceId) => {
-  selectedDevice.value = deviceId;
 };
 
 // 刷新统计
@@ -202,8 +197,7 @@ onUnmounted(() => {
           <div class="sticky top-4">
             <DeviceList
                 :devices="devices"
-                :selected-device="selectedDevice"
-                @select-device="selectDevice"
+                v-model:selected-device="selectedDevice"
                 @refresh-devices="fetchDevices"
             />
 

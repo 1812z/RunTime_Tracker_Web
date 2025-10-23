@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import {ref, onMounted, watch, computed} from 'vue';
 import { useStats } from '../composables/useStats.js';
 
 import RecentApps from "./RecentApps.vue";
@@ -28,6 +28,10 @@ const props = defineProps({
   date: {
     type: String,
     default: ''
+  },
+  showAiSummary: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -186,6 +190,7 @@ watch(stats, (newStats) => {
 
     <!-- AI总结组件 - 支持双向绑定展开状态 -->
     <AISummary
+        v-if="showAiSummary"
         :device-id="deviceId"
         v-model:is-expanded="isAISummaryExpanded"
     />

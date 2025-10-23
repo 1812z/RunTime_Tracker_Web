@@ -1,38 +1,62 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import DeviceStats from './components/DeviceStats.vue';
 import DeviceList from './components/DeviceList.vue';
 import config from './config.js'
 import GiscusComments from './components/GiscusComments.vue';
 import Footer from "./components/Footer.vue";
 import DateSelector from "./components/DateSelector.vue";
+import { pageConfig } from "./composables/componentsFlag.js"
 
-const API_BASE = config.API_BASE
+// ===== 配置管理 =====
+const { pageConfigs, isLoading: configLoading, fetchFlags } = pageConfig();
+
+// 整体加载状态
+const isPageReady = ref(false);
+
+const showDeviceCount = computed(() =>
+    isPageReady.value && (pageConfigs.value?.config?.WEB_DEVICE_COUNT ?? false)
+);
+
+const showComments = computed(() =>
+    isPageReady.value && (pageConfigs.value?.config?.WEB_COMMENT ?? true)
+);
+
+const showAISummary = computed(() =>
+    isPageReady.value && (pageConfigs.value?.config?.WEB_AI_SUMMARY ?? true)
+);
+
+// ===== 其他状态 =====
+const API_BASE = config.API_BASE;
 const devices = ref([]);
 const selectedDevice = ref(null);
-const error = ref(null);
 const clientIp = ref('获取中...');
 const refreshInterval = ref(null);
 const toast = ref({
   show: false,
   message: '',
-  type: 'error' // 可以是 'error' 或 'success'
+  type: 'error'
 });
 
 // 获取本地日期字符串
 const getLocalDateString = (date = new Date()) => {
-  const offset = date.getTimezoneOffset() * 60000; // 获取时区偏移(毫秒)
+  const offset = date.getTimezoneOffset() * 60000;
   const localDate = new Date(date - offset);
   return localDate.toISOString().split('T')[0];
 };
 
-// 使用本地日期初始化
 const selectedDate = ref(getLocalDateString());
-
-// 日期筛选相关状态
 const statsType = ref('daily');
 const timeOffset = ref(0);
-const stats = ref(null); // 用于获取dateRange信息
+const stats = ref(null);
+
+// Toast提示
+const showToast = (message, type = 'error') => {
+  toast.value = { show: true, message, type };
+  setTimeout(() => {
+    toast.value.show = false;
+  }, 3000);
+};
 
 // 获取客户端IP
 const fetchClientIp = async () => {
@@ -44,14 +68,6 @@ const fetchClientIp = async () => {
     clientIp.value = '获取失败';
     console.error('获取IP地址失败:', err);
   }
-};
-
-// Toast提示
-const showToast = (message, type = 'error') => {
-  toast.value = { show: true, message, type };
-  setTimeout(() => {
-    toast.value.show = false;
-  }, 3000); // 3秒后自动消失
 };
 
 // 获取设备基础信息
@@ -75,7 +91,6 @@ const fetchDevices = async () => {
 // 刷新统计
 const refreshStats = () => {
   if (selectedDevice.value) {
-    // 这将触发 DeviceStats 组件重新获取数据
     const temp = selectedDevice.value;
     selectedDevice.value = null;
     setTimeout(() => {
@@ -93,21 +108,17 @@ const setupAutoRefresh = () => {
     if (selectedDevice.value) {
       fetchDevices();
     }
-  }, 30000); // 每30秒刷新一次
+  }, 30000);
 };
 
-// 获取日期范围文本 - 从DeviceStats迁移过来
+// 获取日期范围文本
 const getDateRangeText = () => {
   if (!stats.value?.dateRange) return '';
-
   const { start, end } = stats.value.dateRange;
-  if (start === end) {
-    return start;
-  }
-  return `${start} 至 ${end}`;
+  return start === end ? start : `${start} 至 ${end}`;
 };
 
-// 处理统计数据更新 - 用于接收来自DeviceStats的数据
+// 处理统计数据更新
 const handleStatsUpdate = (newStats) => {
   stats.value = newStats;
 };
@@ -118,9 +129,24 @@ const getSelectedDevice = () => {
   return devices.value.find(device => device.device === selectedDevice.value) || null;
 };
 
-onMounted(() => {
-  fetchDevices();
-  fetchClientIp();
+// ===== 生命周期 =====
+onMounted(async () => {
+  try {
+    await fetchFlags();
+    // 标记页面准备就绪
+    isPageReady.value = true;
+
+    // 并行加载其他数据
+    await Promise.all([
+      fetchDevices(),
+      fetchClientIp()
+    ]);
+  } catch (err) {
+    console.error('❌ 初始化失败:', err);
+    // 即使失败也标记为准备就绪，使用默认配置
+    isPageReady.value = true;
+  }
+
   setupAutoRefresh();
 });
 
@@ -133,10 +159,7 @@ onUnmounted(() => {
 
 <template>
   <!-- Toast 提示 -->
-  <div v-if="toast.show" class="fixed top-4 right-4 z-50 w-auto transition-all duration-300" :class="{
-      'animate-fade-in': toast.show,
-      'animate-fade-out': !toast.show
-    }">
+  <div v-if="toast.show" class="fixed top-4 right-4 z-50 w-auto transition-all duration-300">
     <div class="px-4 py-3 rounded-lg shadow-lg" :class="{
         'bg-red-50 border border-red-200 text-red-700': toast.type === 'error',
         'bg-green-50 border border-green-200 text-green-700': toast.type === 'success'
@@ -152,8 +175,31 @@ onUnmounted(() => {
       </div>
     </div>
   </div>
-  <!-- 主要模块 -->
-  <div class="bg-gray-100 min-h-screen rounded-lg dark:bg-[#1e2022]">
+
+  <!--  加载骨架屏 -->
+  <div v-if="!isPageReady" class="bg-gray-100 min-h-screen rounded-lg dark:bg-[#1e2022]">
+    <div class="max-w-7xl mx-auto px-4">
+      <!-- 标题骨架 -->
+      <div class="h-12 bg-gray-300 dark:bg-gray-700 rounded animate-pulse mx-auto w-96 mt-8 mb-8"></div>
+
+      <div class="flex flex-col lg:flex-row gap-6 pb-6">
+        <!-- 左侧骨架 -->
+        <div class="space-y-6 w-full lg:w-96">
+          <div class="h-32 bg-gray-300 dark:bg-gray-700 rounded animate-pulse"></div>
+          <div class="h-64 bg-gray-300 dark:bg-gray-700 rounded animate-pulse"></div>
+          <div class="h-48 bg-gray-300 dark:bg-gray-700 rounded animate-pulse"></div>
+        </div>
+
+        <!-- 右侧骨架 -->
+        <div class="flex-1">
+          <div class="h-96 bg-gray-300 dark:bg-gray-700 rounded animate-pulse"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 实际内容：只在配置加载完成后显示 -->
+  <div v-else class="bg-gray-100 min-h-screen rounded-lg dark:bg-[#1e2022]">
     <div class="max-w-7xl mx-auto px-4">
       <h1 class="text-4xl font-bold text-center mb-8 flex items-center justify-center gap-3 pt-8">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -161,11 +207,12 @@ onUnmounted(() => {
         </svg>
         设备使用时间统计
       </h1>
+
       <div class="flex flex-col lg:flex-row gap-6 pb-6">
         <!-- 左侧模块区 -->
         <div class="space-y-6">
           <!-- 设备统计卡片 -->
-          <div class="bg-white rounded-lg not-dark:shadow-md p-6 dark:bg-[#181a1b]">
+          <div v-if="showDeviceCount" class="bg-white rounded-lg not-dark:shadow-md p-6 dark:bg-[#181a1b]">
             <div class="grid grid-cols-2 gap-4">
               <div class="border border-gray-200 dark:border-[#384456] rounded-lg p-4 text-center not-dark:shadow-md">
                 <h3 class="text-gray-500 text-sm font-medium flex items-center justify-center gap-1">
@@ -191,7 +238,7 @@ onUnmounted(() => {
           </div>
 
           <!-- 评论区组件 -->
-          <GiscusComments/>
+          <GiscusComments v-if="showComments" />
 
           <!-- 设备列表 -->
           <div class="sticky top-4">
@@ -210,6 +257,7 @@ onUnmounted(() => {
             />
           </div>
         </div>
+
         <!-- 右侧统计 -->
         <div class="flex-1 min-w-0">
           <div class="bg-white rounded-lg not-dark:shadow-md p-6 sticky top-40 dark:bg-[#181a1b]">
@@ -240,6 +288,7 @@ onUnmounted(() => {
                 :stats-type="statsType"
                 :time-offset="timeOffset"
                 @stats-update="handleStatsUpdate"
+                :showAiSummary="showAISummary"
             />
 
             <div v-else class="text-center py-8 text-gray-500">
@@ -255,4 +304,17 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+/* 骨架屏动画 */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
 </style>

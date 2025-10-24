@@ -7,6 +7,7 @@ import GiscusComments from './components/GiscusComments.vue';
 import Footer from "./components/Footer.vue";
 import DateSelector from "./components/DateSelector.vue";
 import { pageConfig } from "./composables/componentsFlag.js"
+import Header from "./components/Header.vue";
 
 // ===== 配置管理 =====
 const { pageConfigs, isLoading: configLoading, fetchFlags } = pageConfig();
@@ -201,12 +202,7 @@ onUnmounted(() => {
   <!-- 实际内容：只在配置加载完成后显示 -->
   <div v-else class="bg-gray-100 min-h-screen rounded-lg dark:bg-[#1e2022]">
     <div class="max-w-7xl mx-auto px-4">
-      <h1 class="text-4xl font-bold text-center mb-8 flex items-center justify-center gap-3 pt-8">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z" />
-        </svg>
-        设备使用时间统计
-      </h1>
+      <Header></Header>
 
       <div class="flex flex-col lg:flex-row gap-6 pb-6">
         <!-- 左侧模块区 -->

@@ -37,6 +37,9 @@ const chartInstance = {
   current: null
 };
 
+// 记录上一次使用的单位，用于判断是否需要重新创建图表
+const lastUseHours = ref(null);
+
 const getChartTitle = () => {
   const titles = {
     hour: '24小时使用统计',
@@ -49,7 +52,7 @@ const getChartTitle = () => {
 // 计算是否应该使用小时单位
 const shouldUseHours = computed(() => {
   const maxValue = Math.max(...props.timeStats);
-  return maxValue >= 60;
+  return maxValue >= 70;
 });
 
 // 转换数据为合适的单位
@@ -65,6 +68,16 @@ const getYAxisLabel = () => {
   return shouldUseHours.value ? '小时' : '分钟';
 };
 
+// 创建刻度格式化函数
+const createTicksCallback = (useHours) => {
+  return function(value) {
+    if (useHours) {
+      return value.toFixed(1);
+    }
+    return Math.round(value);
+  };
+};
+
 const initChart = () => {
   const ctx = canvasRef.value?.getContext('2d');
   if (!ctx || !props.timeStats || props.timeStats.length === 0) return;
@@ -77,6 +90,9 @@ const initChart = () => {
   const useHours = shouldUseHours.value;
   const convertedData = getConvertedData();
   const yAxisLabel = getYAxisLabel();
+
+  // 更新记录的单位状态
+  lastUseHours.value = useHours;
 
   chartInstance.current = new Chart(ctx, {
     type: 'bar',
@@ -128,15 +144,7 @@ const initChart = () => {
             text: yAxisLabel
           },
           ticks: {
-            callback: function(value) {
-              // Y轴刻度显示
-              if (useHours) {
-                if (value >= 2)
-                  return value.toFixed(0);
-                else return value.toFixed(1);
-              }
-              return Math.round(value);
-            }
+            callback: createTicksCallback(useHours)
           }
         },
         x: {
@@ -155,24 +163,33 @@ const initChart = () => {
 
 const updateChart = () => {
   nextTick(() => {
+    const currentUseHours = shouldUseHours.value;
+
     if (!chartInstance.current) {
+      // 图表不存在，初始化
+      initChart();
+    } else if (props.timeLabels.length !== chartInstance.current.data.labels.length) {
+      // 标签数量变化，需要重新创建（比如从24小时切换到7天）
+      initChart();
+    } else if (lastUseHours.value !== null && lastUseHours.value !== currentUseHours) {
+      // 单位发生变化（分钟 ↔ 小时），需要重新创建
       initChart();
     } else {
-      // 检查是否需要重新创建图表（单位变化或标签数量变化）
-      const currentUseHours = shouldUseHours.value;
-      const oldLabel = chartInstance.current.options.scales.y.title.text;
-      const newLabel = getYAxisLabel();
+      // 更新数据
+      const convertedData = getConvertedData();
+      const yAxisLabel = getYAxisLabel();
 
-      if (props.timeLabels.length !== chartInstance.current.data.labels.length || oldLabel !== newLabel) {
-        // 如果标签数量变化或单位变化，重新创建图表
-        initChart();
-      } else {
-        // 只更新数据
-        chartInstance.current.data.labels = props.timeLabels;
-        chartInstance.current.data.datasets[0].data = getConvertedData();
-        chartInstance.current.data.datasets[0].label = `使用时间 (${newLabel})`;
-        chartInstance.current.update();
-      }
+      chartInstance.current.data.labels = props.timeLabels;
+      chartInstance.current.data.datasets[0].data = convertedData;
+      chartInstance.current.data.datasets[0].label = `使用时间 (${yAxisLabel})`;
+
+      // 更新Y轴标题
+      chartInstance.current.options.scales.y.title.text = yAxisLabel;
+
+      // 更新图表标题
+      chartInstance.current.options.plugins.title.text = getChartTitle();
+
+      chartInstance.current.update();
     }
   });
 };

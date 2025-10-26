@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, nextTick, onMounted, onUnmounted } from 'vue';
+import { ref, watch, nextTick, onMounted, onUnmounted, computed } from 'vue';
 import {
   Chart,
   CategoryScale,
@@ -32,7 +32,7 @@ const props = defineProps({
 });
 
 const canvasRef = ref(null);
-// 使用对象存储图表实例，避免响应式问题
+// 使用对象存储图表实例,避免响应式问题
 const chartInstance = {
   current: null
 };
@@ -46,6 +46,25 @@ const getChartTitle = () => {
   return titles[props.timeDimension] || '使用统计';
 };
 
+// 计算是否应该使用小时单位
+const shouldUseHours = computed(() => {
+  const maxValue = Math.max(...props.timeStats);
+  return maxValue >= 60;
+});
+
+// 转换数据为合适的单位
+const getConvertedData = () => {
+  if (shouldUseHours.value) {
+    return props.timeStats.map(v => v / 60);
+  }
+  return props.timeStats;
+};
+
+// 获取Y轴标签
+const getYAxisLabel = () => {
+  return shouldUseHours.value ? '小时' : '分钟';
+};
+
 const initChart = () => {
   const ctx = canvasRef.value?.getContext('2d');
   if (!ctx || !props.timeStats || props.timeStats.length === 0) return;
@@ -55,13 +74,17 @@ const initChart = () => {
     chartInstance.current.destroy();
   }
 
+  const useHours = shouldUseHours.value;
+  const convertedData = getConvertedData();
+  const yAxisLabel = getYAxisLabel();
+
   chartInstance.current = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: props.timeLabels,
       datasets: [{
-        label: '使用时间 (分钟)',
-        data: props.timeStats,
+        label: `使用时间 (${yAxisLabel})`,
+        data: convertedData,
         backgroundColor: 'rgba(54, 162, 235, 0.5)',
         borderColor: 'rgba(54, 162, 235, 1)',
         borderWidth: 1
@@ -81,13 +104,17 @@ const initChart = () => {
         tooltip: {
           callbacks: {
             label: function (context) {
-              const value = context.parsed.y || 0;
-              if (value < 60) {
-                return `${value.toFixed(2)}分钟`;
+              // 获取原始分钟数
+              const minuteValue = props.timeStats[context.dataIndex] || 0;
+              if (minuteValue < 60) {
+                return `${minuteValue.toFixed(2)}分钟`;
               } else {
-                const hours = Math.floor(value / 60);
-                const minutes = Math.round(value % 60);
-                return `${hours}小时`;
+                const hours = Math.floor(minuteValue / 60);
+                const minutes = Math.round(minuteValue % 60);
+                if (minutes === 0) {
+                  return `${hours}小时`;
+                }
+                return `${hours}小时${minutes}分钟`;
               }
             }
           }
@@ -98,7 +125,18 @@ const initChart = () => {
           beginAtZero: true,
           title: {
             display: true,
-            text: '分钟'
+            text: yAxisLabel
+          },
+          ticks: {
+            callback: function(value) {
+              // Y轴刻度显示
+              if (useHours) {
+                if (value >= 2)
+                  return value.toFixed(0);
+                else return value.toFixed(1);
+              }
+              return Math.round(value);
+            }
           }
         },
         x: {
@@ -120,13 +158,19 @@ const updateChart = () => {
     if (!chartInstance.current) {
       initChart();
     } else {
-      if (props.timeLabels.length !== chartInstance.current.data.labels.length) {
-        // 如果标签数量变化，重新创建图表
+      // 检查是否需要重新创建图表（单位变化或标签数量变化）
+      const currentUseHours = shouldUseHours.value;
+      const oldLabel = chartInstance.current.options.scales.y.title.text;
+      const newLabel = getYAxisLabel();
+
+      if (props.timeLabels.length !== chartInstance.current.data.labels.length || oldLabel !== newLabel) {
+        // 如果标签数量变化或单位变化，重新创建图表
         initChart();
       } else {
         // 只更新数据
         chartInstance.current.data.labels = props.timeLabels;
-        chartInstance.current.data.datasets[0].data = props.timeStats;
+        chartInstance.current.data.datasets[0].data = getConvertedData();
+        chartInstance.current.data.datasets[0].label = `使用时间 (${newLabel})`;
         chartInstance.current.update();
       }
     }

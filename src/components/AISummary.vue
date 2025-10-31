@@ -74,6 +74,8 @@ watch(() => props.isExpanded, (expanded) => {
 
 // 监听设备ID变化，重新加载数据
 watch(() => props.deviceId, () => {
+  if (props.deviceId === "summary") return;
+
   // 重置数据但保持展开状态
   summary.value = null;
   timestamp.value = null;

@@ -1,12 +1,13 @@
 <script setup>
 import {ref, onMounted, watch, computed} from 'vue';
 import { useStats } from '../composables/useStats.js';
-
+import { formatTime } from "../composables/formatTime.js"
 import RecentApps from "./RecentApps.vue";
 import UsageDetails from "./UsageDetails.vue";
 import AppUsageChart from "./charts/AppUsageChart.vue";
 import TimeUsageChart from "./charts/TimeUsageChart.vue";
 import AISummary from "./AISummary.vue";
+import EyeTimeStats from "./EyeTimeStats.vue";
 
 const props = defineProps({
   deviceId: {
@@ -61,18 +62,6 @@ const calculateRunningTime = () => {
   const startTime = new Date(props.deviceInfo.runningSince);
   const now = new Date();
   return Math.floor((now - startTime) / 60000);
-};
-
-// 格式化时间
-const formatTime = (minutes) => {
-  const totalMinutes = parseFloat(minutes);
-  if (totalMinutes < 60) {
-    return `${totalMinutes.toFixed(2)}分`;
-  } else {
-    const hours = Math.floor(totalMinutes / 60);
-    const remainingMinutes = Math.round(totalMinutes % 60);
-    return `${hours}时${remainingMinutes}分`;
-  }
 };
 
 // 获取设备统计信息
@@ -153,7 +142,7 @@ watch(stats, (newStats) => {
         <p class="text-xl md:text-2xl font-bold">{{ getDeviceStats().appCount }}</p>
       </div>
       <div class="bg-green-50 hover:bg-green-100 transition-colors duration-200 p-4 rounded-lg shadow-md dark:bg-green-950 dark:hover:bg-green-900">
-        <p class="text-sm text-green-700">总时间</p>
+        <p class="text-sm text-green-700">应用总时间</p>
         <p class="text-xl md:text-2xl font-bold whitespace-nowrap">{{ formatTime(getDeviceStats().totalUsageMinutes) }}</p>
       </div>
       <div class="bg-yellow-50 hover:bg-yellow-100 transition-colors duration-200 p-4 rounded-lg shadow-md dark:bg-yellow-950 dark:hover:bg-yellow-900">
@@ -168,32 +157,49 @@ watch(stats, (newStats) => {
       </div>
     </div>
 
-    <!-- 当前使用情况 -->
-    <div class="mb-6">
-      <div class="bg-blue-50 hover:bg-blue-100 transition-colors duration-200 p-4 rounded-lg shadow-md dark:bg-[#1d1f20] dark:hover:bg-blue-900/30">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm text-blue-800">{{ deviceInfo?.running ? '当前应用' : '上次应用' }}</p>
-            <p class="text-xl font-bold">{{ deviceInfo?.currentApp }}</p>
-          </div>
-          <div>
-            <p class="text-sm text-blue-800">状态</p>
-            <p class="text-xl font-bold">{{ deviceInfo?.running ? '运行中' : '已停止' }}</p>
-          </div>
-          <div>
-            <p class="text-sm text-blue-800">已运行时间</p>
-            <p class="text-xl font-bold">{{ calculateRunningTime() }} 分钟</p>
+    <!-- 当前使用情况和用眼时间的切换容器 -->
+    <div class="relative mb-6">
+      <Transition name="slide-fade" mode="out-in">
+        <!-- 当前使用情况 -->
+        <div v-if="deviceInfo?.device !== 'summary'" key="current-app">
+          <div class="bg-blue-50 hover:bg-blue-100 transition-colors duration-200 p-4 rounded-lg shadow-md dark:bg-[#1d1f20] dark:hover:bg-blue-900/30">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-blue-800">{{ deviceInfo?.running ? '当前应用' : '上次应用' }}</p>
+                <p class="text-xl font-bold">{{ deviceInfo?.currentApp }}</p>
+              </div>
+              <div>
+                <p class="text-sm text-blue-800">状态</p>
+                <p class="text-xl font-bold">{{ deviceInfo?.running ? '运行中' : '已停止' }}</p>
+              </div>
+              <div>
+                <p class="text-sm text-blue-800">已运行时间</p>
+                <p class="text-xl font-bold">{{ calculateRunningTime() }} 分钟</p>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+
+        <!-- 用眼时间 -->
+        <div v-else key="eye-time">
+          <EyeTimeStats
+              :statsType="props.statsType"
+              :timeOffset="props.timeOffset"
+              :date="props.date"
+          />
+        </div>
+      </Transition>
     </div>
 
     <!-- AI总结组件 - 支持双向绑定展开状态 -->
-    <AISummary
-        v-if="showAiSummary"
-        :device-id="deviceId"
-        v-model:is-expanded="isAISummaryExpanded"
-    />
+    <Transition name="slide-fade" mode="out-in">
+      <AISummary
+          v-show="showAiSummary && deviceInfo?.device !== 'summary'"
+          :device-id="deviceId"
+          v-model:is-expanded="isAISummaryExpanded"
+      />
+    </Transition>
+
 
     <!-- 图表组件 -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -212,6 +218,47 @@ watch(stats, (newStats) => {
     <UsageDetails :stats="stats || {}" :show-limit="10" />
 
     <!-- 最近使用的APP组件 -->
-    <RecentApps v-show="props.statsType === 'daily'" :deviceId="deviceId" />
+    <RecentApps v-show="props.statsType === 'daily' && deviceInfo?.device !== 'summary'" :deviceId="deviceId"/>
   </div>
 </template>
+
+<style scoped>
+/* Transition动画：同时进行淡入淡出，并保持布局流动 */
+.slide-fade-enter-active {
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out, max-height 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out, max-height 0.3s ease-out;
+  overflow: hidden;
+}
+
+/* 为左侧整体容器添加平滑过渡 */
+.space-y-6 > * {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.slide-fade-enter-from {
+  opacity: 0;
+  transform: translateY(-20px);
+  max-height: 0;
+}
+
+.slide-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-20px);
+  max-height: 0;
+}
+
+.slide-fade-enter-to,
+.slide-fade-leave-from {
+  opacity: 1;
+  transform: translateY(0);
+  max-height: 500px; /* 根据实际内容高度调整 */
+}
+
+/* 让容器在动画期间也有过渡效果 */
+.relative.mb-6 {
+  transition: height 0.3s ease-out;
+}
+</style>

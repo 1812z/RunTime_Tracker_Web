@@ -40,6 +40,11 @@ const toast = ref({
   type: 'error'
 });
 
+const OVERVIEW_DEVICE = {
+  device: 'summary',
+  currentApp: '不告诉你'
+};
+
 // 获取本地日期字符串
 const getLocalDateString = (date = new Date()) => {
   const offset = date.getTimezoneOffset() * 60000;
@@ -79,7 +84,9 @@ const fetchDevices = async () => {
     if (!response.ok) {
       throw new Error(`请求失败: ${response.status}`);
     }
-    devices.value = await response.json();
+    const realDevices = await response.json();
+    devices.value = [OVERVIEW_DEVICE, ...realDevices];
+
     if (devices.value.length > 0 && !selectedDevice.value) {
       selectedDevice.value = devices.value[0].device;
     }
@@ -251,12 +258,15 @@ onUnmounted(() => {
             />
 
             <!-- 日期筛选组件 -->
-            <DateSelector
-                v-model="statsType"
-                v-model:offset="timeOffset"
-                v-model:selected-date="selectedDate"
-                :date-range-text="getDateRangeText()"
-            />
+            <Transition name="slide-fade">
+              <DateSelector
+                  v-show="selectedDevice !== null"
+                  v-model="statsType"
+                  v-model:offset="timeOffset"
+                  v-model:selected-date="selectedDate"
+                  :date-range-text="getDateRangeText()"
+              />
+            </Transition>
           </div>
         </div>
 
@@ -268,8 +278,8 @@ onUnmounted(() => {
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
-                <span v-if="selectedDevice">{{ selectedDevice }} 使用统计</span>
-                <span v-else>请选择设备查看统计</span>
+                <span v-if="selectedDevice!=='summary'">{{ selectedDevice }} 使用统计</span>
+                <span v-else>总览</span>
               </h2>
 
               <button v-if="selectedDevice" @click="refreshStats" class="px-3 py-1 text-sm bg-gray-100 rounded-md hover:bg-gray-200 transition-colors dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700">
@@ -296,7 +306,7 @@ onUnmounted(() => {
             </transition>
 
             <DeviceStats
-                v-if="selectedDevice"
+                v-if="devices.length !== 1 && selectedDevice"
                 :key="statsKey"
                 :device-id="selectedDevice"
                 :device-info="getSelectedDevice()"
@@ -308,7 +318,7 @@ onUnmounted(() => {
             />
 
             <!-- 空状态提示 - 仅当没有设备时显示 -->
-            <div v-else-if="devices.length === 0" class="text-center py-8 text-gray-500">
+            <div v-else class="text-center py-8 text-gray-500">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
@@ -369,5 +379,40 @@ onUnmounted(() => {
 .fade-enter-to,
 .fade-leave-from {
   opacity: 1;
+}
+
+/* DateSelector 动画 - 方案四：使用 max-height 和 overflow */
+.slide-fade-enter-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.slide-fade-enter-from {
+  opacity: 0;
+  max-height: 0;
+  transform: translateY(-10px);
+}
+
+.slide-fade-enter-to {
+  opacity: 1;
+  max-height: 220px;
+  transform: translateY(0);
+}
+
+.slide-fade-leave-from {
+  opacity: 1;
+  max-height: 300px;
+  transform: translateY(0);
+}
+
+.slide-fade-leave-to {
+  opacity: 0;
+  max-height: 0;
+  transform: translateY(-10px);
 }
 </style>

@@ -28,6 +28,10 @@ const props = defineProps({
   timeDimension: {
     type: String,
     default: 'hour'
+  },
+  type: {
+    type: String,
+    default: 'app'
   }
 });
 
@@ -41,11 +45,20 @@ const chartInstance = {
 const lastUseHours = ref(null);
 
 const getChartTitle = () => {
-  const titles = {
-    hour: '24小时使用统计',
-    day: '周使用统计',
-    week: '月使用统计'
-  };
+  let titles;
+  if (props.type === 'eye') {
+    titles = {
+      hour: '24小时屏幕使用时间',
+      day: '周屏幕使用统计',
+      week: '月屏幕使用统计'
+    };
+  }else {
+    titles = {
+      hour: '24小时应用使用统计',
+      day: '周应用使用统计',
+      week: '月应用使用统计'
+    };
+  }
   return titles[props.timeDimension] || '使用统计';
 };
 
@@ -111,8 +124,7 @@ const initChart = () => {
       maintainAspectRatio: false,
       plugins: {
         title: {
-          display: true,
-          text: getChartTitle()
+          display: false
         },
         legend: {
           display: false
@@ -185,9 +197,6 @@ const updateChart = () => {
 
       // 更新Y轴标题
       chartInstance.current.options.scales.y.title.text = yAxisLabel;
-
-      // 更新图表标题
-      chartInstance.current.options.plugins.title.text = getChartTitle();
 
       chartInstance.current.update();
     }

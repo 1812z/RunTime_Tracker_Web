@@ -80,9 +80,11 @@ const getBatteryTextClass = (level, isCharging) => {
       >
         <div class="flex justify-between items-start">
           <div class="flex-1">
-            <h3 class="font-bold text-lg">{{ device.device }}</h3>
+            <h3 class="font-bold text-lg">
+              {{ device.device === 'summary' ? '总览' : device.device }}
+            </h3>
             <p class="not-dark:text-gray-600 text-sm mt-1">
-              <span class="font-medium">当前应用:</span> {{ device.currentApp || '无' }}
+              <span class="font-medium"  v-show="device.device!=='summary'">当前应用:</span>{{ device.device === 'summary' ? '点击查看总览' : device.currentApp }}
             </p>
 
             <!-- 动态电量显示 -->
@@ -154,6 +156,7 @@ const getBatteryTextClass = (level, isCharging) => {
           <span
               class="inline-block px-2 py-1 text-xs rounded-full"
               :class="device.running ? 'bg-green-100 not-dark:text-green-800 dark:bg-green-950' : 'bg-red-100 not-dark:text-red-800 dark:bg-red-950'"
+              v-show="device.device!=='summary'"
           >
             {{ device.running ? '运行中' : '已停止' }}
           </span>

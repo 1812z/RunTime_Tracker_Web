@@ -14,7 +14,11 @@ const props = defineProps({
     type: String,
     default: null
   },
-  dateRangeText: String
+  dateRangeText: String,
+  serverTzOffset: {
+    type: Number,
+    default: 8
+  },
 });
 
 const emit = defineEmits(['update:modelValue', 'update:offset', 'update:selected-date']);
@@ -33,38 +37,53 @@ const statsTypes = [
   { value: 'monthly', label: '月', icon: '📈' }
 ];
 
-// 获取本地日期字符串
-const getLocalDateString = (date = new Date()) => {
-  return date.toISOString().split('T')[0];
+// 获取服务器时区的当前时间
+const getServerTime = () => {
+  const now = new Date();
+  // 获取UTC时间戳
+  const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+  // 转换为服务器时区时间
+  return new Date(utcTime + (props.serverTzOffset * 3600000));
 };
 
-// 计算最大日期（今天）
+// 获取服务器时区的日期字符串
+const getServerDateString = (date = null) => {
+  const targetDate = date || getServerTime();
+  const year = targetDate.getFullYear();
+  const month = String(targetDate.getMonth() + 1).padStart(2, '0');
+  const day = String(targetDate.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+// 计算最大日期（服务器时区的今天）
 const getMaxDate = computed(() => {
-  return getLocalDateString();
+  return getServerDateString();
 });
 
-// 根据offset计算对应的日期
+// 根据offset计算对应的日期（基于服务器时区）
 const calculateDateFromOffset = (offset) => {
-  const today = new Date();
-  const targetDate = new Date(today);
-  targetDate.setDate(today.getDate() + offset); // offset为负数时是过去的日期
-  return getLocalDateString(targetDate);
+  const serverToday = getServerTime();
+  serverToday.setDate(serverToday.getDate() + offset);
+  return getServerDateString(serverToday);
 };
 
-// 根据日期计算offset
+// 根据日期计算offset（基于服务器时区）
 const calculateOffsetFromDate = (dateString) => {
-  const today = new Date();
-  const selectedDate = new Date(dateString + 'T00:00:00'); // 添加时间部分避免时区问题
-  const todayString = getLocalDateString(today);
-  const todayDate = new Date(todayString + 'T00:00:00');
+  const serverToday = getServerTime();
+  serverToday.setHours(0, 0, 0, 0);
 
-  const diffTime = selectedDate - todayDate;
-  return Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  // 解析选中的日期
+  const [year, month, day] = dateString.split('-').map(Number);
+  const selectedDate = new Date(year, month - 1, day);
+
+  // 计算天数差异
+  const diffTime = selectedDate - serverToday;
+  return Math.round(diffTime / (1000 * 60 * 60 * 24));
 };
 
-// 初始化日期
+// 初始化日期为服务器时区的今天
 if (!currentDate.value) {
-  currentDate.value = getLocalDateString();
+  currentDate.value = getServerDateString();
 }
 
 watch(statsType, (newValue) => {
@@ -72,18 +91,16 @@ watch(statsType, (newValue) => {
   currentOffset.value = 0;
   emit('update:offset', 0);
 
-  // 当切换到日统计时，确保日期与offset同步
+  // 当切换到日统计时，重置为服务器时区的今天
   if (newValue === 'daily') {
-    currentDate.value = calculateDateFromOffset(currentOffset.value);
+    currentDate.value = getServerDateString();
   }
 });
 
 watch(currentDate, async (newValue) => {
-  // 先emit选中日期事件
   emit('update:selected-date', newValue);
 
   if (newValue && statsType.value === 'daily' && !isUpdatingFromOffset.value) {
-    // 当手动选择日期时，更新offset
     isUpdatingFromDate.value = true;
     const newOffset = calculateOffsetFromDate(newValue);
     currentOffset.value = newOffset;
@@ -122,6 +139,13 @@ watch(() => props.selectedDate, (newValue) => {
   }
 });
 
+// 监听服务器时区变化，重新计算日期
+watch(() => props.serverTzOffset, () => {
+  if (statsType.value === 'daily') {
+    currentDate.value = calculateDateFromOffset(currentOffset.value);
+  }
+});
+
 // 日期增加减少
 const decreaseOffset = () => {
   currentOffset.value--;
@@ -133,14 +157,13 @@ const increaseOffset = () => {
   }
 };
 
-// 计算是否可以增加offset（即是否可以选择更近的日期）
+// 计算是否可以增加offset
 const canIncreaseOffset = computed(() => {
   if (statsType.value === 'daily') {
-    // 在日统计模式下，检查当前日期是否是今天
-    const today = getLocalDateString();
-    return currentDate.value !== today;
+    // 检查当前日期是否是服务器时区的今天
+    const serverToday = getServerDateString();
+    return currentDate.value !== serverToday;
   } else {
-    // 在其他模式下，检查offset是否小于0
     return currentOffset.value < 0;
   }
 });
@@ -162,6 +185,12 @@ const getTimeRangeText = () => {
     case 'monthly': return `${absOffset}月前`;
   }
 };
+
+// 显示当前使用的时区
+const timezoneDisplay = computed(() => {
+  const offset = props.serverTzOffset;
+  return `UTC${offset >= 0 ? '+' : ''}${offset}`;
+});
 </script>
 
 <template>
@@ -176,10 +205,10 @@ const getTimeRangeText = () => {
             </svg>
             时间
           </h2>
+          <span :title="timezoneDisplay">{{ dateRangeText }}</span>
           <Transition name="fade" mode="out-in">
             <span v-if="statsType !== 'daily'" key="date-range-text" class="text-sm font-medium">{{ dateRangeText }}</span>
           </Transition>
-
         </div>
       </div>
 
@@ -217,17 +246,17 @@ const getTimeRangeText = () => {
 
           <div class="flex items-center justify-center min-w-[160px] h-8">
             <Transition name="fade" mode="out-in">
-                <span v-if="statsType !== 'daily'"
-                      key="time-range"
-                      class="text-sm font-medium text-center text-gray-700 dark:text-gray-200">
-                  {{ getTimeRangeText() }}
-                </span>
+              <span v-if="statsType !== 'daily'"
+                    key="time-range"
+                    class="text-sm font-medium text-center text-gray-700 dark:text-gray-200">
+                {{ getTimeRangeText() }}
+              </span>
               <input v-else
-                key="date-picker"
-                type="date"
-                v-model="currentDate"
-                class="px-3 py-3 border border-gray-300 dark:border-[#384456] rounded-md not-dark:shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm hover:bg-gray-200 dark:hover:bg-gray-800"
-                :max="getMaxDate"
+                     key="date-picker"
+                     type="date"
+                     v-model="currentDate"
+                     class="px-3 py-3 border border-gray-300 dark:border-[#384456] rounded-md not-dark:shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm hover:bg-gray-200 dark:hover:bg-gray-800"
+                     :max="getMaxDate"
               />
             </Transition>
           </div>
@@ -254,7 +283,7 @@ const getTimeRangeText = () => {
       <div class="flex flex-col gap-3 mt-2 md:hidden lg:flex lg:flex-col">
         <!-- 居中并占满 -->
         <div class="flex justify-center w-full">
-          <div class="inline-flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1 shadow-inner  w-auto justify-between items-center">
+          <div class="inline-flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1 shadow-inner w-auto justify-between items-center">
             <button
                 v-for="type in statsTypes"
                 :key="type.value"
@@ -288,20 +317,18 @@ const getTimeRangeText = () => {
 
         <!-- 中间区域 - 使用固定高度避免布局跳动 -->
         <div class="flex items-center justify-center min-w-[140px] h-10 relative">
-          <!-- 日期显示 - 仅在非日统计模式下显示 -->
           <Transition name="fade-switch" mode="out-in">
-              <span v-if="statsType !== 'daily'"
-                    key="time-range"
-                    class="text-sm font-medium text-center text-gray-700 dark:text-gray-200">
-                {{ getTimeRangeText() }}
-              </span>
-            <!-- 日期选择器 - 仅在日统计模式下显示 -->
+            <span v-if="statsType !== 'daily'"
+                  key="time-range"
+                  class="text-sm font-medium text-center text-gray-700 dark:text-gray-200">
+              {{ getTimeRangeText() }}
+            </span>
             <input v-else
-              key="date-picker"
-              type="date"
-              v-model="currentDate"
-              class="px-3 py-2 border border-gray-300 dark:border-[#384456] rounded-md not-dark:shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm hover:bg-gray-200 dark:hover:bg-gray-800"
-              :max="getMaxDate"
+                   key="date-picker"
+                   type="date"
+                   v-model="currentDate"
+                   class="px-3 py-2 border border-gray-300 dark:border-[#384456] rounded-md not-dark:shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm hover:bg-gray-200 dark:hover:bg-gray-800"
+                   :max="getMaxDate"
             />
           </Transition>
         </div>

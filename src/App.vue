@@ -27,6 +27,10 @@ const showAISummary = computed(() =>
     isPageReady.value && (pageConfigs.value?.config?.WEB_AI_SUMMARY ?? true)
 );
 
+const serverTzOffset = computed(() =>
+    pageConfigs.value?.tzOffset ?? 8
+);
+
 // ===== 其他状态 =====
 const API_BASE = config.API_BASE;
 const devices = ref([]);
@@ -265,6 +269,7 @@ onUnmounted(() => {
                   v-model:offset="timeOffset"
                   v-model:selected-date="selectedDate"
                   :date-range-text="getDateRangeText()"
+                  :server-tz-offset="serverTzOffset"
               />
             </Transition>
           </div>

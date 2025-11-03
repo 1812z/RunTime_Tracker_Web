@@ -76,11 +76,11 @@ watch(stats, (newStats) => {
       {{ error }}
     </div>
     <div class="grid grid-cols-2 gap-4 mb-6">
-      <div class="bg-green-50 hover:bg-green-100 transition-colors duration-200 p-4 rounded-lg shadow-md">
+      <div class="bg-green-50 hover:bg-green-100 dark:bg-green-950 dark:hover:bg-green-900 transition-colors duration-200 p-4 rounded-lg shadow-md">
         <p class="text-sm text-green-700">屏幕总时间</p>
         <p class="text-xl md:text-2xl font-bold whitespace-nowrap">{{ formatTime(getEyetimeStats().totalUsageMinutes) }}</p>
       </div>
-      <div class="bg-purple-50 hover:bg-purple-100 transition-colors duration-200 p-4 rounded-lg shadow-md">
+      <div class="bg-purple-50 hover:bg-purple-100 dark:bg-purple-950 dark:hover:bg-purple-900 transition-colors duration-200 p-4 rounded-lg shadow-md">
         <p class="text-sm text-purple-700">最活跃时段</p>
         <p class="text-xl md:text-2xl font-bold">{{ getEyetimeStats().busiestLabel || '-' }}</p>
       </div>

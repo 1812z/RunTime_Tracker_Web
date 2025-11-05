@@ -1,4 +1,4 @@
-// composables/componentsFlag.js
+// composables/pageConfig.js
 import { ref } from 'vue';
 import config from '../config.js';
 
@@ -13,8 +13,18 @@ export function pageConfig() {
         config: {
             WEB_DEVICE_COUNT: true,      // 设备统计卡片
             WEB_COMMENT: true,           // 评论区
-            WEB_AI_SUMMARY: true         // AI总结
-            // 可以添加更多配置项
+            WEB_AI_SUMMARY: true,        // AI总结
+            // Giscus 评论系统配置
+            GISCUS_REPO: '',             // GitHub 仓库
+            GISCUS_REPOID: '',           // 仓库 ID
+            GISCUS_CATEGORY: '',         // Discussion 分类
+            GISCUS_CATEGORYID: '',       // 分类 ID
+            GISCUS_MAPPING: 'pathname',  // 页面映射方式
+            GISCUS_REACTIONSENABLED: true,  // 启用反应
+            GISCUS_EMITMETADATA: false,  // 输出元数据
+            GISCUS_INPUTPOSITION: 'bottom', // 输入框位置
+            GISCUS_THEME: 'light',       // 主题
+            GISCUS_LANG: 'zh-CN'         // 语言
         },
         tzOffset: 8  // 默认时区偏移量（东8区）
     });

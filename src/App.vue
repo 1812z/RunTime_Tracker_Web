@@ -6,7 +6,7 @@ import config from './config.js'
 import GiscusComments from './components/GiscusComments.vue';
 import Footer from "./components/Footer.vue";
 import DateSelector from "./components/DateSelector.vue";
-import { pageConfig } from "./composables/componentsFlag.js"
+import { pageConfig } from "./composables/pageConfig.js"
 import Header from "./components/Header.vue";
 
 // ===== 配置管理 =====
@@ -251,8 +251,19 @@ onUnmounted(() => {
           </div>
 
           <!-- 评论区组件 -->
-          <GiscusComments v-if="showComments" />
-
+          <GiscusComments
+              v-if="showComments"
+              :repo="pageConfigs.config.GISCUS_REPO"
+              :repo-id="pageConfigs.config.GISCUS_REPOID"
+              :category="pageConfigs.config.GISCUS_CATEGORY"
+              :category-id="pageConfigs.config.GISCUS_CATEGORYID"
+              :mapping="pageConfigs.config.GISCUS_MAPPING"
+              :reactions-enabled="pageConfigs.config.GISCUS_REACTIONSENABLED ? '1' : '0'"
+              :emit-metadata="pageConfigs.config.GISCUS_EMITMETADATA ? '1' : '0'"
+              :input-position="pageConfigs.config.GISCUS_INPUTPOSITION"
+              :theme="pageConfigs.config.GISCUS_THEME"
+              :lang="pageConfigs.config.GISCUS_LANG"
+          />
           <!-- 设备列表 -->
           <div class="sticky top-4">
             <DeviceList

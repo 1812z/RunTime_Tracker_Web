@@ -205,9 +205,8 @@ const timezoneDisplay = computed(() => {
             </svg>
             时间
           </h2>
-          <span :title="timezoneDisplay">{{ dateRangeText }}</span>
           <Transition name="fade" mode="out-in">
-            <span v-if="statsType !== 'daily'" key="date-range-text" class="text-sm font-medium">{{ dateRangeText }}</span>
+            <span v-if="statsType !== 'daily'" key="date-range-text" class="text-sm font-medium" :title="timezoneDisplay">{{ dateRangeText }}</span>
           </Transition>
         </div>
       </div>

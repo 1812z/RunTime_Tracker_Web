@@ -42,13 +42,13 @@
    
    - 选择你 Fork 的仓库
    - 分支选择：`master`
-   - 构建设置：保持默认即可
+   - 构建设置：npm run build
+   - 构建输出 dist
    - **环境变量配置**：
-     - 变量名：`VITE_API_BASE`
+     - 变量名：`VITE_API_BASE` 
      - 值：你的后端 API 地址（例如：`https://your-api.example.com/api`）
      - ⚠️ 注意：必须保留 `/api` 后缀
    
-   ![环境变量配置示例](img.png)
 
 4. **完成部署**
    

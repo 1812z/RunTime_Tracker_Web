@@ -234,7 +234,7 @@ onUnmounted(() => {
                   </svg>
                   总设备数
                 </h3>
-                <p class="text-2xl font-bold mt-2">{{ devices.length }}</p>
+                <p class="text-2xl font-bold mt-2">{{ devices.filter(d => d.device !== 'summary').length }}</p>
               </div>
               <div class="border border-gray-200 dark:border-[#384456] rounded-lg p-4 text-center not-dark:shadow-md">
                 <h3 class="text-gray-500 text-sm font-medium flex items-center justify-center gap-1">

@@ -31,6 +31,14 @@ const serverTzOffset = computed(() =>
     pageConfigs.value?.tzOffset ?? 8
 );
 
+const showSummary = computed(() =>
+    isPageReady.value && (pageConfigs.value?.config?.WEB_SUMMARY ?? true)
+);
+
+const hasRealDevices = computed(() => {
+  return devices.value.some(d => d.device !== 'summary');
+});
+
 // ===== 其他状态 =====
 const API_BASE = config.API_BASE;
 const devices = ref([]);
@@ -89,7 +97,13 @@ const fetchDevices = async () => {
       throw new Error(`请求失败: ${response.status}`);
     }
     const realDevices = await response.json();
-    devices.value = [OVERVIEW_DEVICE, ...realDevices];
+
+    // 根据 WEB_SUMMARY 配置决定是否添加 summary 虚拟设备
+    if (showSummary.value) {
+      devices.value = [OVERVIEW_DEVICE, ...realDevices];
+    } else {
+      devices.value = realDevices;
+    }
 
     if (devices.value.length > 0 && !selectedDevice.value) {
       selectedDevice.value = devices.value[0].device;
@@ -322,7 +336,7 @@ onUnmounted(() => {
             </transition>
 
             <DeviceStats
-                v-if="devices.length !== 1 && selectedDevice"
+                v-if="hasRealDevices && selectedDevice"
                 :key="statsKey"
                 :device-id="selectedDevice"
                 :device-info="getSelectedDevice()"

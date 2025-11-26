@@ -44,6 +44,14 @@ const { stats, error, loading, fetchStats } = useStats();
 // AI总结展开状态 - 在设备切换时保持
 const isAISummaryExpanded = ref(false);
 
+// 判断是否为当天日期
+const isToday = computed(() => {
+  if (!props.date) return true; // 如果没有传入日期，默认当作当天处理
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  return props.date === todayStr;
+});
+
 // 加载统计数据
 const loadStats = async () => {
   await fetchStats(props.deviceId, {
@@ -191,15 +199,14 @@ watch(stats, (newStats) => {
       </Transition>
     </div>
 
-    <!-- AI总结组件 - 支持双向绑定展开状态 -->
+    <!-- AI总结组件  -->
     <Transition name="slide-fade" mode="out-in">
       <AISummary
-          v-show="showAiSummary && deviceInfo?.device !== 'summary'"
+          v-show="showAiSummary && deviceInfo?.device !== 'summary' && isToday"
           :device-id="deviceId"
           v-model:is-expanded="isAISummaryExpanded"
       />
     </Transition>
-
 
     <!-- 图表组件 -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">

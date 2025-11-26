@@ -83,9 +83,11 @@ const getBatteryTextClass = (level, isCharging) => {
             <h3 class="font-bold text-lg">
               {{ device.device === 'summary' ? '总览' : device.device }}
             </h3>
-            <p class="not-dark:text-gray-600 text-sm mt-1">
-              <span class="font-medium"  v-show="device.device!=='summary'">当前应用:</span>{{ device.device === 'summary' ? '点击查看总览' : device.currentApp }}
-            </p>
+            <div class="not-dark:text-gray-600 text-sm mt-1 flex" v-if="device.device!=='summary'">
+              <span class="font-medium shrink-0">当前应用:</span>
+              <span class="truncate ml-1" :title="device.currentApp">{{ device.currentApp }}</span>
+            </div>
+            <p class="not-dark:text-gray-600 text-sm mt-1" v-else>点击查看总览</p>
 
             <!-- 动态电量显示 -->
             <div v-if="device.batteryLevel > 0" class="flex items-center mt-2">

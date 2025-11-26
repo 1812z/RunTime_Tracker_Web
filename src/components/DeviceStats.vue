@@ -202,7 +202,7 @@ watch(stats, (newStats) => {
     <!-- AI总结组件  -->
     <Transition name="slide-fade" mode="out-in">
       <AISummary
-          v-show="showAiSummary && deviceInfo?.device !== 'summary' && isToday"
+          v-show="showAiSummary && deviceInfo?.device !== 'summary' && isToday && statsType === 'daily'"
           :device-id="deviceId"
           v-model:is-expanded="isAISummaryExpanded"
       />

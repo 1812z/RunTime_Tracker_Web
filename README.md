@@ -25,6 +25,8 @@
 
 利用 Cloudflare Pages 实现免费、快速部署，支持自动构建和部署。
 
+国内用户建议EdgeOne Pages，同样免费，延迟更低。
+
 #### 步骤
 
 1. **Fork 项目仓库**

@@ -345,6 +345,7 @@ onUnmounted(() => {
                 :time-offset="timeOffset"
                 @stats-update="handleStatsUpdate"
                 :showAiSummary="showAISummary"
+                :refresh-trigger="statsKey"
             />
 
             <!-- 空状态提示 - 仅当没有设备时显示 -->

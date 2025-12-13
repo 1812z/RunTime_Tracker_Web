@@ -33,6 +33,10 @@ const props = defineProps({
   showAiSummary: {
     type: Boolean,
     default: false
+  },
+  refreshTrigger: {
+    type: Number,
+    default: 0
   }
 });
 
@@ -225,7 +229,7 @@ watch(stats, (newStats) => {
     <UsageDetails :stats="stats || {}" :show-limit="10" />
 
     <!-- 最近使用的APP组件 -->
-    <RecentApps v-show="props.statsType === 'daily' && deviceInfo?.device !== 'summary'" :deviceId="deviceId"/>
+    <RecentApps v-show="props.statsType === 'daily' && deviceInfo?.device !== 'summary'" :deviceId="deviceId" :refreshTrigger="props.refreshTrigger"/>
   </div>
 </template>
 

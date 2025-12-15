@@ -99,7 +99,7 @@ const toggleExpanded = () => {
         </tr>
         </tbody>
         <!-- 手机设备分2行显示 -->
-        <tbody class="not-dark:divide-y divide-gray-200 sm:hidden">
+        <tbody class="not-dark:divide-y divide-gray-200 sm:hidden dark:divide-gray-700">
         <tr v-for="usage in displayedApps" :key="usage.app">
           <!-- 调整为垂直布局 -->
           <td class="w-full py-1">

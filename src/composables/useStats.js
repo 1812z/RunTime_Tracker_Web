@@ -54,54 +54,46 @@ export function useStats() {
         }
     };
 
-    const fetchWeeklyStats = async (deviceId, weekOffset = 0, mode = 'single') => {
+    /**
+     * 通用的周期统计获取函数
+     * @param {string} periodType - 周期类型 ('weekly' 或 'monthly')
+     * @param {string} deviceId - 设备ID
+     * @param {number} offset - 时间偏移量
+     * @param {string} mode - 模式 ('single' 或其他)
+     * @param {Function} transformFn - 数据转换函数
+     */
+    const fetchPeriodStats = async (periodType, deviceId, offset, mode, transformFn) => {
         loading.value = true;
         error.value = null;
 
         try {
             const offsetHours = getTimezoneOffset();
+            const offsetParam = periodType === 'weekly' ? 'weekOffset' : 'monthOffset';
             let url;
             if (mode === 'single'){
-                url = `${API_BASE}/weekly/${deviceId}?weekOffset=${weekOffset}&timezoneOffset=${offsetHours}`;
+                url = `${API_BASE}/${periodType}/${deviceId}?${offsetParam}=${offset}&timezoneOffset=${offsetHours}`;
             }else {
-                url = `${API_BASE}/eyetime/weekly?weekOffset=${weekOffset}&timezoneOffset=${offsetHours}`;
+                url = `${API_BASE}/eyetime/${periodType}?${offsetParam}=${offset}&timezoneOffset=${offsetHours}`;
             }
 
             const response = await fetch(url);
-            if (!response.ok) throw new Error('获取周统计失败');
+            if (!response.ok) throw new Error(`获取${periodType === 'weekly' ? '周' : '月'}统计失败`);
             const data = await response.json();
 
-            stats.value = transformWeeklyData(data, isEyetimeMode(mode));
+            stats.value = transformFn(data, isEyetimeMode(mode));
         } catch (err) {
-            error.value = `获取周统计信息失败: ${err.message}`;
+            error.value = `获取${periodType === 'weekly' ? '周' : '月'}统计信息失败: ${err.message}`;
         } finally {
             loading.value = false;
         }
     };
 
+    const fetchWeeklyStats = async (deviceId, weekOffset = 0, mode = 'single') => {
+        await fetchPeriodStats('weekly', deviceId, weekOffset, mode, transformWeeklyData);
+    };
+
     const fetchMonthlyStats = async (deviceId, monthOffset = 0, mode = 'single') => {
-        loading.value = true;
-        error.value = null;
-
-        try {
-            const offsetHours = getTimezoneOffset();
-            let url;
-            if (mode === 'single'){
-                url = `${API_BASE}/monthly/${deviceId}?monthOffset=${monthOffset}&timezoneOffset=${offsetHours}`;
-            }else {
-                url = `${API_BASE}/eyetime/monthly?monthOffset=${monthOffset}&timezoneOffset=${offsetHours}`;
-            }
-
-            const response = await fetch(url);
-            if (!response.ok) throw new Error('获取月统计失败');
-            const data = await response.json();
-
-            stats.value = transformMonthlyData(data, isEyetimeMode(mode));
-        } catch (err) {
-            error.value = `获取月统计信息失败: ${err.message}`;
-        } finally {
-            loading.value = false;
-        }
+        await fetchPeriodStats('monthly', deviceId, monthOffset, mode, transformMonthlyData);
     };
 
     /**
@@ -124,38 +116,15 @@ export function useStats() {
         };
     };
 
-    const transformWeeklyData = (data, eyetimeMode = false) => {
-        let appStats = {};
-        if (!eyetimeMode && data.appDailyStats) {
-            Object.entries(data.appDailyStats).forEach(([appName, dailyData]) => {
-                appStats[appName] = Object.values(dailyData).reduce((sum, val) => sum + val, 0);
-            });
-        } else {
-            appStats = null; // eyetime接口无appDailyStats
-        }
-
-        const dates = Object.keys(data.dailyTotals || {}).sort();
-        const timeLabels = dates.map(date => {
-            const d = new Date(date);
-            return `${d.getMonth() + 1}/${d.getDate()}`;
-        });
-        const timeStats = dates.map(date => data.dailyTotals[date] || 0);
-        const totalUsage = appStats ? Object.values(appStats).reduce((sum, val) => sum + val, 0)
-            : timeStats.reduce((sum, val) => sum + val, 0);
-
-        return {
-            type: 'weekly',
-            dateRange: data.weekRange,
-            totalUsage,
-            appStats,
-            timeStats,
-            timeLabels,
-            timeDimension: 'day',
-            rawData: data
-        };
-    };
-
-    const transformMonthlyData = (data, eyetimeMode = false) => {
+    /**
+     * 通用的周期数据转换函数
+     * @param {Object} data - 原始API响应数据
+     * @param {string} type - 统计类型 ('weekly' 或 'monthly')
+     * @param {string} dateRangeKey - 日期范围的键名 ('weekRange' 或 'monthRange')
+     * @param {string} timeDimension - 时间维度 ('day' 或 'week')
+     * @param {boolean} eyetimeMode - 是否为eyetime模式
+     */
+    const transformPeriodData = (data, type, dateRangeKey, timeDimension, eyetimeMode = false) => {
         let appStats = {};
         if (!eyetimeMode && data.appDailyStats) {
             Object.entries(data.appDailyStats).forEach(([appName, dailyData]) => {
@@ -175,16 +144,22 @@ export function useStats() {
             : timeStats.reduce((sum, val) => sum + val, 0);
 
         return {
-            type: 'monthly',
-            dateRange: data.monthRange,
+            type,
+            dateRange: data[dateRangeKey],
             totalUsage,
             appStats,
             timeStats,
             timeLabels,
-            timeDimension: 'week',
+            timeDimension,
             rawData: data
         };
     };
+
+    const transformWeeklyData = (data, eyetimeMode = false) =>
+        transformPeriodData(data, 'weekly', 'weekRange', 'day', eyetimeMode);
+
+    const transformMonthlyData = (data, eyetimeMode = false) =>
+        transformPeriodData(data, 'monthly', 'monthRange', 'week', eyetimeMode);
 
     /**
      * 通用统计获取方法

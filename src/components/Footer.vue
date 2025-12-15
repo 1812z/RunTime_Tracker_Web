@@ -19,7 +19,7 @@ const props = defineProps({
 
       <!-- 版权信息 -->
       <p class="text-gray-500 text-sm mr-4 dark:text-gray-400">
-        © 2025 Runtime Tracker V0.6.1
+        © 2025 Runtime Tracker V0.6.2
       </p>
 
       <!-- GitHub链接 -->

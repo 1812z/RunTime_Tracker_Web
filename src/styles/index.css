@@ -1,1 +1,7 @@
 @import "tailwindcss";
+
+/* 配置暗黑模式使用 class 策略 */
+@variant dark (&:where(.dark, .dark *));
+
+/* 配置 not-dark 变体（亮色模式） */
+@variant not-dark (&:where(:not(.dark), :not(.dark) *));

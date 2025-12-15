@@ -1,13 +1,14 @@
 body {
-    background-color: #f5f5f5; /* 例如 #f5f5f5 */
+    background-color: #f5f5f5;
+    color: #111827; /* 默认深色文字 */
 }
 
-@media (prefers-color-scheme: dark) {
-    body {
-        background-color: #111827; /* gray-900 */
-        color: #f3f4f6; /* gray-100 */
-    }
+/* 使用 class 策略控制暗黑模式，而不是媒体查询 */
+.dark body {
+    background-color: #111827; /* gray-900 */
+    color: #f3f4f6; /* gray-100 */
 }
+
 .dark {
     color-scheme: dark;
 }

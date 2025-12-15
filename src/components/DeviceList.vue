@@ -66,7 +66,7 @@ const getBatteryTextClass = (level, isCharging) => {
 
     <div id="devicesList" class="space-y-3">
       <!-- 空状态 -->
-      <div v-if="devices.length === 0" class="text-center py-8 text-gray-400">
+      <div v-if="devices.length === 0" class="text-center py-8 text-gray-400 dark:text-gray-500">
         暂无设备数据
       </div>
 
@@ -83,15 +83,15 @@ const getBatteryTextClass = (level, isCharging) => {
             <h3 class="font-bold text-lg">
               {{ device.device === 'summary' ? '总览' : device.device }}
             </h3>
-            <div class="not-dark:text-gray-600 text-sm mt-1 flex" v-if="device.device!=='summary'">
+            <div class="text-gray-600 dark:text-gray-400 text-sm mt-1 flex" v-if="device.device!=='summary'">
               <span class="font-medium shrink-0">当前应用:</span>
               <span class="truncate ml-1" :title="device.currentApp">{{ device.currentApp }}</span>
             </div>
-            <p class="not-dark:text-gray-600 text-sm mt-1" v-else>点击查看总览</p>
+            <p class="text-gray-600 dark:text-gray-400 text-sm mt-1" v-else>点击查看总览</p>
 
             <!-- 动态电量显示 -->
             <div v-if="device.batteryLevel > 0" class="flex items-center mt-2">
-              <span class="text-gray-600 text-sm font-medium mr-2">电量:</span>
+              <span class="text-gray-600 dark:text-gray-400 text-sm font-medium mr-2">电量:</span>
               <div class="relative">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -156,8 +156,10 @@ const getBatteryTextClass = (level, isCharging) => {
 
           <!-- 运行状态 -->
           <span
-              class="inline-block px-2 py-1 text-xs rounded-full"
-              :class="device.running ? 'bg-green-100 not-dark:text-green-800 dark:bg-green-950' : 'bg-red-100 not-dark:text-red-800 dark:bg-red-950'"
+              class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full transition-all duration-200"
+              :class="device.running
+                ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 dark:ring-1 dark:ring-green-500/30'
+                : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 dark:ring-1 dark:ring-red-500/30'"
               v-show="device.device!=='summary'"
           >
             {{ device.running ? '运行中' : '已停止' }}

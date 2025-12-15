@@ -68,7 +68,7 @@ const toggleExpanded = () => {
   <div class="rounded-lg border-2 border-gray-200 shadow-md p-6 mb-6 dark:bg-[#181a1b] dark:border-gray-700">
     <h3 class="text-lg font-medium mb-4">详细使用数据</h3>
     <div class="overflow-x-auto">
-      <table class="min-w-full not-dark:divide-y divide-gray-200">
+      <table class="min-w-full not-dark:divide-y divide-gray-200 dark:divide-gray-700">
         <thead>
         <tr>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider not-sm:hidden">应用</th>
@@ -76,7 +76,7 @@ const toggleExpanded = () => {
         </tr>
         <!-- PC/平板设备并排显示 -->
         </thead>
-        <tbody class="not-dark:divide-y divide-gray-200 not-sm:hidden">
+        <tbody class="not-dark:divide-y divide-gray-200 not-sm:hidden dark:divide-gray-700">
         <tr v-for="usage in displayedApps" :key="usage.app">
           <td class="w-auto max-w-[50%] py-3 whitespace-nowrap text-sm font-medium">{{ usage.app }}</td>
           <td class="w-full max-w-[70%] px-6 py-3 whitespace-nowrap">

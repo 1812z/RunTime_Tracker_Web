@@ -2,6 +2,9 @@ import { createApp } from 'vue'
 import './style.css'
 import './styles/index.css'
 import App from './App.vue'
+import config from './config.js';
+document.title = config.SITE_TITLE;
+
 import {
     Chart,
     ArcElement,

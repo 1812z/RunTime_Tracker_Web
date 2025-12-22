@@ -40,7 +40,7 @@ const modeConfig = computed(() => {
 </script>
 
 <template>
-  <div class="fixed bottom-6 right-6 z-50">
+  <div class="fixed bottom-18 right-6 z-50">
     <button
       @click="toggleDarkMode"
       class="group relative flex items-center justify-center w-14 h-14 bg-white dark:bg-gray-800 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-gray-200 dark:border-gray-700"

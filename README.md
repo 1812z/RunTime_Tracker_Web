@@ -47,9 +47,8 @@
    - 构建设置：npm run build
    - 构建输出 dist
    - **环境变量配置**：
-     - 变量名：`VITE_API_BASE` 
-     - 值：你的后端 API 地址（例如：`https://your-api.example.com/api`）
-     - ⚠️ 注意：必须保留 `/api` 后缀
+     - 变量名：`VITE_API_BASE`  值：你的后端 API 地址（例如：`https://your-api.example.com/api` ⚠️ 注意：必须保留 `/api` 后缀）
+     - 变量名：`VITE_SITE_TITLE` (可选) 值：站点标题
    
 
 4. **完成部署**

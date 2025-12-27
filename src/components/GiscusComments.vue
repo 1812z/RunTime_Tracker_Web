@@ -14,7 +14,7 @@
         <span class="sr-only">切换评论显示</span>
       </label>
     </div>
-    <div v-show="showComments" class="overflow-y-auto h-[60vh] sticky top-4 overflow-hidden">
+    <div v-show="showComments" class="overflow-y-auto h-[64vh] mt-4">
       <div class="giscus-container">
         <div ref="giscusElement" class="giscus"></div>
       </div>
